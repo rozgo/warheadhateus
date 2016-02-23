@@ -46,7 +46,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-246' class='srclink' href='../src/warheadhateus/lib.rs.html#144-156' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-252' class='srclink' href='../src/warheadhateus/lib.rs.html#146-160' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct AWSAuth {
     // some fields omitted
 }</pre><div class='docblock'><p>Amazon Web Service Authorization Header struct</p>
@@ -56,9 +56,18 @@
 <div class='docblock'><p>Add a header field to the AWSAuth struct.</p>
 </div><h4 id='method.set_access_key_id' class='method'><code>fn <a href='#method.set_access_key_id' class='fnname'>set_access_key_id</a>(&amp;mut self, access_key_id: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; &amp;mut <a class='struct' href='../warheadhateus/struct.AWSAuth.html' title='warheadhateus::AWSAuth'>AWSAuth</a></code></h4>
 <div class='docblock'><p>Set the AWS Access Key ID (this is supplied by Amazon).</p>
+</div><h4 id='method.set_chunk_size' class='method'><code>fn <a href='#method.set_chunk_size' class='fnname'>set_chunk_size</a>(&amp;mut self, chunk_size: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a>) -&gt; &amp;mut <a class='struct' href='../warheadhateus/struct.AWSAuth.html' title='warheadhateus::AWSAuth'>AWSAuth</a></code></h4>
+<div class='docblock'><p>Set the chunk size.
+* Note this is only used when Mode::Chunk is selected.
+* Chunk size must be at least 8 KB. We recommend a chunk size of a least 64 KB for better
+performance. This chunk size applies to all chunk except the last one. The last chunk you
+send can be smaller than 8 KB. If your payload is small and can fit in one chunk, then it
+can be smaller than the 8 KB.</p>
 </div><h4 id='method.set_date' class='method'><code>fn <a href='#method.set_date' class='fnname'>set_date</a>(&amp;mut self, date: <a class='struct' href='../chrono/datetime/struct.DateTime.html' title='chrono::datetime::DateTime'>DateTime</a>&lt;<a class='struct' href='../chrono/offset/utc/struct.UTC.html' title='chrono::offset::utc::UTC'>UTC</a>&gt;) -&gt; &amp;mut <a class='struct' href='../warheadhateus/struct.AWSAuth.html' title='warheadhateus::AWSAuth'>AWSAuth</a></code></h4>
 <div class='docblock'><p>Set the scope date for the auth request.  Request are valid for 7 days from the given date.
 * Note that this date doesn&#39;t have to match the <em>x-amz-date</em> or <em>date</em> header values.</p>
+</div><h4 id='method.set_mode' class='method'><code>fn <a href='#method.set_mode' class='fnname'>set_mode</a>(&amp;mut self, mode: <a class='enum' href='../warheadhateus/enum.Mode.html' title='warheadhateus::Mode'>Mode</a>) -&gt; &amp;mut <a class='struct' href='../warheadhateus/struct.AWSAuth.html' title='warheadhateus::AWSAuth'>AWSAuth</a></code></h4>
+<div class='docblock'><p>Set the mode of operation.</p>
 </div><h4 id='method.set_payload_hash' class='method'><code>fn <a href='#method.set_payload_hash' class='fnname'>set_payload_hash</a>(&amp;mut self, payload_hash: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; &amp;mut <a class='struct' href='../warheadhateus/struct.AWSAuth.html' title='warheadhateus::AWSAuth'>AWSAuth</a></code></h4>
 <div class='docblock'><p>Set the payload hash.  This should be the hash of any request payload, or the hash of the
 empty string (&quot;&quot;) if there is no payload.</p>
@@ -72,6 +81,8 @@ empty string (&quot;&quot;) if there is no payload.</p>
 <div class='docblock'><p>Set the AWS services this request should be constructed for (i.e. s3)</p>
 </div><h4 id='method.auth_header' class='method'><code>fn <a href='#method.auth_header' class='fnname'>auth_header</a>(&amp;self) -&gt; <a class='type' href='../warheadhateus/type.AWSAuthResult.html' title='warheadhateus::AWSAuthResult'>AWSAuthResult</a></code></h4>
 <div class='docblock'><p>Create the AWS S3 Authorization HTTP header.</p>
+</div><h4 id='method.content_length' class='method'><code>fn <a href='#method.content_length' class='fnname'>content_length</a>(&amp;self, payload_size: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, AWSAuthError&gt;</code></h4>
+<div class='docblock'><p>Generate the value for the &#39;Content-Length&#39; header when using chunked mode.</p>
 </div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/default/trait.Default.html' title='core::default::Default'>Default</a> for <a class='struct' href='../warheadhateus/struct.AWSAuth.html' title='warheadhateus::AWSAuth'>AWSAuth</a></code></h3><div class='impl-items'><h4 id='method.default' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/default/trait.Default.html#method.default' class='fnname'>default</a>() -&gt; <a class='struct' href='../warheadhateus/struct.AWSAuth.html' title='warheadhateus::AWSAuth'>AWSAuth</a></code></h4>
 </div></section>
     <section id='search' class="content hidden"></section>

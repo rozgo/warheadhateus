@@ -46,7 +46,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-0' class='srclink' href='../src/warheadhateus/lib.rs.html#9-640' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-0' class='srclink' href='../src/warheadhateus/lib.rs.html#9-770' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>AWS Authorization Header Generation (AWS Signature Version 4)</p>
 <pre class='rust rust-example-rendered'>
 <span class='comment'>// ##      ##    ###    ########  ##     ## ########    ###    ########</span>
@@ -85,7 +85,7 @@
 <span class='kw'>const</span> <span class='ident'>ACCESS_KEY_ID</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;AKIAIOSFODNN7EXAMPLE&quot;</span>;
 <span class='kw'>const</span> <span class='ident'>SECRET_ACCESS_KEY</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY&quot;</span>;
 <span class='kw'>const</span> <span class='ident'>HOST</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;examplebucket.s3.amazonaws.com&quot;</span>;
-<span class='kw'>const</span> <span class='ident'>AWS_TEST_1</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;Authorization: AWS4-HMAC-SHA256 \
+<span class='kw'>const</span> <span class='ident'>AWS_TEST_1</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;AWS4-HMAC-SHA256 \
 Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request,\
 SignedHeaders=host;range;x-amz-content-sha256;x-amz-date,\
 Signature=f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd91039c6036bdb41&quot;</span>;
@@ -148,6 +148,15 @@ Signature=f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd91039c6036bdb41&quot;
                                title='warheadhateus::HttpRequestMethod'>HttpRequestMethod</a></td>
                         <td class='docblock short'>
                              <p>See <a href="https://tools.ietf.org/html/rfc7231#section-4">RFC7231</a></p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='enum' href='enum.Mode.html'
+                               title='warheadhateus::Mode'>Mode</a></td>
+                        <td class='docblock short'>
+                             <p>Amazon S3 Mode of Operation</p>
 
                         </td>
                     </tr>
