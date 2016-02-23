@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `secmem` mod in crate `sodium_sys`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, secmem">
+
+    <title>sodium_sys::crypto::utils::secmem - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../../index.html'>sodium_sys</a>::<wbr><a href='../../index.html'>crypto</a>::<wbr><a href='../index.html'>utils</a></p><script>window.sidebarCurrent = {name: 'secmem', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Module <a href='../../../index.html'>sodium_sys</a>::<wbr><a href='../../index.html'>crypto</a>::<wbr><a href='../index.html'>utils</a>::<wbr><a class='mod' href=''>secmem</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-1221' class='srclink' href='../../../../src/sodium_sys/crypto/utils/secmem.rs.html#1-520' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Various utility and memory safety functions.</p>
+</div><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.allocarray.html'
+                               title='sodium_sys::crypto::utils::secmem::allocarray'>allocarray</a></td>
+                        <td class='docblock short'>
+                             <p>The <em>allocarray()</em> function returns a mutable byte array.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.bin2hex.html'
+                               title='sodium_sys::crypto::utils::secmem::bin2hex'>bin2hex</a></td>
+                        <td class='docblock short'>
+                             <p>The <em>bin2hex()</em> function converts a byte sequence into a hexadecimal string.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.free.html'
+                               title='sodium_sys::crypto::utils::secmem::free'>free</a></td>
+                        <td class='docblock short'>
+                             <p>The <em>free()</em> function unlocks and deallocates memory allocated using
+<em>malloc()</em> or <em>allocarray()</em>.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.hex2bin.html'
+                               title='sodium_sys::crypto::utils::secmem::hex2bin'>hex2bin</a></td>
+                        <td class='docblock short'>
+                             <p>The <em>hex2bin()</em> function parses a hexadecimal string and converts it to a
+byte sequence.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.malloc.html'
+                               title='sodium_sys::crypto::utils::secmem::malloc'>malloc</a></td>
+                        <td class='docblock short'>
+                             <p>The <em>malloc()</em> function returns a mutable array of bytes.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.memcmp.html'
+                               title='sodium_sys::crypto::utils::secmem::memcmp'>memcmp</a></td>
+                        <td class='docblock short'>
+                             <p>When a comparison involves secret data (e.g. key, authentication tag), is it
+critical to use a constant-time comparison function in order to mitigate
+side-channel attacks.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.memzero.html'
+                               title='sodium_sys::crypto::utils::secmem::memzero'>memzero</a></td>
+                        <td class='docblock short'>
+                             <p>After use, sensitive data should be overwritten, but <em>memset()</em> and
+hand-written code can be silently stripped out by an optimizing compiler or
+by the linker.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.mlock.html'
+                               title='sodium_sys::crypto::utils::secmem::mlock'>mlock</a></td>
+                        <td class='docblock short'>
+                             <p>The <em>mlock()</em> function locks the bytes of the given array. This can help
+avoid swapping sensitive data to disk.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.mprotect_noaccess.html'
+                               title='sodium_sys::crypto::utils::secmem::mprotect_noaccess'>mprotect_noaccess</a></td>
+                        <td class='docblock short'>
+                             <p>The <em>mprotect_noaccess()</em> function makes a region allocated using <em>malloc()</em>
+ or <em>allocarray()</em> inaccessible. It cannot be read or written, but the data
+are preserved.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.mprotect_readonly.html'
+                               title='sodium_sys::crypto::utils::secmem::mprotect_readonly'>mprotect_readonly</a></td>
+                        <td class='docblock short'>
+                             <p>The <em>mprotect_readonly()</em> function marks a region allocated using <em>malloc()</em>
+or <em>allocarray()</em> as read-only.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.mprotect_readwrite.html'
+                               title='sodium_sys::crypto::utils::secmem::mprotect_readwrite'>mprotect_readwrite</a></td>
+                        <td class='docblock short'>
+                             <p>The <em>mprotect_readwrite()</em> function marks a region allocated using
+<em>malloc()</em> or <em>allocarray()</em> as readable and writable, after having been
+protected using <em>mprotect_readonly()</em> or <em>mprotect_noaccess()</em>.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.munlock.html'
+                               title='sodium_sys::crypto::utils::secmem::munlock'>munlock</a></td>
+                        <td class='docblock short'>
+                             <p>The <em>munlock()</em> function should be called after locked memory is not being
+used any more. It will zero the bytes in the array before actually flagging
+the pages as swappable again. Calling <em>memzero()</em> prior to <em>munlock()</em> is
+thus not required.</p>
+
+                        </td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../../";
+        window.currentCrate = "sodium_sys";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../../jquery.js"></script>
+    <script src="../../../../main.js"></script>
+    
+    <script defer src="../../../../search-index.js"></script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["BYTES","32 bytes."],["KEYBYTES","32 bytes."]],"fn":[["auth","The *auth()* function computes a tag for the message and a key. The key should be KEYBYTES bytes. The function return the tag byte sequence."],["auth_verify","The *auth_verify()* function verifies that the mac is a valid mac for the given message and the key k."]]});

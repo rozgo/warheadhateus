@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Nonce","The nonce structure contains information necessary to create slices from raw parts."]]});

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `aead` mod in crate `sodium_sys`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, aead">
+
+    <title>sodium_sys::crypto::symmetrickey::aead - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../../index.html'>sodium_sys</a>::<wbr><a href='../../index.html'>crypto</a>::<wbr><a href='../index.html'>symmetrickey</a></p><script>window.sidebarCurrent = {name: 'aead', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Module <a href='../../../index.html'>sodium_sys</a>::<wbr><a href='../../index.html'>crypto</a>::<wbr><a href='../index.html'>symmetrickey</a>::<wbr><a class='mod' href=''>aead</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-771' class='srclink' href='../../../../src/sodium_sys/crypto/symmetrickey/aead.rs.html#1-361' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Secret Key Authenticated Encryption with Associated Data</p>
+
+<p>This operation:</p>
+
+<ul>
+<li>Encrypts a message with a key and a nonce to keep it confidential</li>
+<li>Computes an authentication tag. This tag is used to make sure that the message, as well as
+optional, non-confidential (non-encrypted) data, haven&#39;t been tampered with.
+A typical use case for associated data is to store protocol-specific metadata about the
+message, such as its length and encoding.</li>
+</ul>
+
+<p>The chosen construction uses encrypt-then-MAC and decryption will never be performed, even
+partially, before verification.</p>
+
+<h1 id='notes' class='section-header'><a href='#notes'>Notes</a></h1>
+<p>The nonce is 64 bits long. In order to prevent nonce reuse, if a key is being reused, it is
+recommended to increment the previous nonce instead of generating a random nonce for each
+message.</p>
+
+<p>The API conforms to the proposed API for the
+<a href="http://competitions.cr.yp.to/caesar.html">CAESAR</a> competition.</p>
+
+<p>The construction conforms to the <a href="https://tools.ietf.org/html/draft-agl-tls-chacha20poly1305-04">ChaCha20 and Poly1305 based Cipher Suites for TLS draft</a>, and
+Sodium&#39;s implementation is fully interoperable with other current implementations.</p>
+
+<p>The <a href="https://tools.ietf.org/html/rfc7539">ChaCha20 and Poly1305 for IETF protocols</a> RFC
+published later slightly changes the construction. That construction is also available by
+building sodium-sys with the latest feature as <em>aead_encrypt_ietf()</em> and <em>aead_decrypt_ietf()</em>.
+It features a longer nonce, which is IETF_NONCEBYTES bytes long.</p>
+
+<p>A high-level <em>aead_</em>()* API is intentionally not defined until the
+<a href="http://competitions.cr.yp.to/caesar.html">CAESAR</a> competition is over.</p>
+</div><h2 id='constants' class='section-header'><a href="#constants">Constants</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='constant' href='constant.ABYTES.html'
+                               title='sodium_sys::crypto::symmetrickey::aead::ABYTES'>ABYTES</a></td>
+                        <td class='docblock short'>
+                             <p>16 bytes.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='constant' href='constant.KEYBYTES.html'
+                               title='sodium_sys::crypto::symmetrickey::aead::KEYBYTES'>KEYBYTES</a></td>
+                        <td class='docblock short'>
+                             <p>32 bytes.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='constant' href='constant.NPUBBYTES.html'
+                               title='sodium_sys::crypto::symmetrickey::aead::NPUBBYTES'>NPUBBYTES</a></td>
+                        <td class='docblock short'>
+                             <p>0 bytes.
+8 bytes.</p>
+
+                        </td>
+                    </tr>
+                </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.aead_decrypt.html'
+                               title='sodium_sys::crypto::symmetrickey::aead::aead_decrypt'>aead_decrypt</a></td>
+                        <td class='docblock short'>
+                             <p>The <em>aead_decrypt()</em> function verifies that the ciphertext (as produced by <em>aead_encrypt()</em>)
+includes a valid tag using a secret key, a public nonce, and optional associated data.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.aead_encrypt.html'
+                               title='sodium_sys::crypto::symmetrickey::aead::aead_encrypt'>aead_encrypt</a></td>
+                        <td class='docblock short'>
+                             <p>The <em>aead_encrypt()</em> function encrypts a message using a secret key and a public nonce.</p>
+
+                        </td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../../";
+        window.currentCrate = "sodium_sys";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../../jquery.js"></script>
+    <script src="../../../../main.js"></script>
+    
+    <script defer src="../../../../search-index.js"></script>
+</body>
+</html>

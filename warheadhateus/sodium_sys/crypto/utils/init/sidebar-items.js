@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["init","*init()* initializes the library and should be called before any other function provided by sodium_sys. The function can be called more than once, but it should not be executed by multiple threads simultaneously. Add appropriate locks around the function call if this scenario can happen in your application."]]});

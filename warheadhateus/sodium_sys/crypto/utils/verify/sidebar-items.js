@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["crypto_verify_16_BYTES",""],["crypto_verify_32_BYTES",""],["crypto_verify_64_BYTES",""]],"fn":[["verify_16",""],["verify_16_bytes",""],["verify_32",""],["verify_32_bytes",""],["verify_64",""],["verify_64_bytes",""]]});

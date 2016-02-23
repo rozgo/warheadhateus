@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `munlock` fn in crate `sodium_sys`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, munlock">
+
+    <title>sodium_sys::crypto::utils::secmem::munlock - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../../index.html'>sodium_sys</a>::<wbr><a href='../../index.html'>crypto</a>::<wbr><a href='../index.html'>utils</a>::<wbr><a href='index.html'>secmem</a></p><script>window.sidebarCurrent = {name: 'munlock', ty: 'fn', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content fn">
+<h1 class='fqn'><span class='in-band'>Function <a href='../../../index.html'>sodium_sys</a>::<wbr><a href='../../index.html'>crypto</a>::<wbr><a href='../index.html'>utils</a>::<wbr><a href='index.html'>secmem</a>::<wbr><a class='fn' href=''>munlock</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-1309' class='srclink' href='../../../../src/sodium_sys/crypto/utils/secmem.rs.html#270-275' title='goto source code'>[src]</a></span></h1>
+<pre class='rust fn'>pub fn munlock(mem: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a></pre><div class='docblock'><p>The <em>munlock()</em> function should be called after locked memory is not being
+used any more. It will zero the bytes in the array before actually flagging
+the pages as swappable again. Calling <em>memzero()</em> prior to <em>munlock()</em> is
+thus not required.</p>
+
+<p>On systems where it is supported, <em>sodium_mlock()</em> also wraps <em>madvise()</em>
+and advises the kernel not to include the locked memory in coredumps.
+<em>ss_unlock()</em> also undoes this additional protection.</p>
+
+<p><em>munlock</em> safely wraps <em>sodium_munlock</em>.</p>
+
+<h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>sodium_sys</span>::<span class='ident'>crypto</span>::<span class='ident'>utils</span>::<span class='ident'>secmem</span>::{<span class='ident'>mlock</span>, <span class='ident'>munlock</span>};
+
+<span class='kw'>let</span> <span class='ident'>v</span> <span class='op'>=</span> [<span class='number'>0</span>, <span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>4</span>, <span class='number'>5</span>, <span class='number'>6</span>, <span class='number'>7</span>];
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>mlock</span>(<span class='kw-2'>&amp;</span><span class='ident'>v</span>) <span class='op'>==</span> <span class='number'>0</span>);
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>munlock</span>(<span class='kw-2'>&amp;</span><span class='ident'>v</span>) <span class='op'>==</span> <span class='number'>0</span>);
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>v</span> <span class='op'>==</span> [<span class='number'>0</span>; <span class='number'>8</span>]);</pre>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../../";
+        window.currentCrate = "sodium_sys";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../../jquery.js"></script>
+    <script src="../../../../main.js"></script>
+    
+    <script defer src="../../../../search-index.js"></script>
+</body>
+</html>

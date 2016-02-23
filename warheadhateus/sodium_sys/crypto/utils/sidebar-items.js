@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["init","This module contains the *init()* function."],["nonce","Memory safe nonce implementation."],["randombytes","Utility functions for generating random values and byte sequences."],["secmem","Various utility and memory safety functions."],["verify","Byte sequence verification."],["version","libsodium version information."]]});

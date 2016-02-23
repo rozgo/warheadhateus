@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `authenc` mod in crate `sodium_sys`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, authenc">
+
+    <title>sodium_sys::crypto::asymmetrickey::authenc - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../../index.html'>sodium_sys</a>::<wbr><a href='../../index.html'>crypto</a>::<wbr><a href='../index.html'>asymmetrickey</a></p><script>window.sidebarCurrent = {name: 'authenc', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Module <a href='../../../index.html'>sodium_sys</a>::<wbr><a href='../../index.html'>crypto</a>::<wbr><a href='../index.html'>asymmetrickey</a>::<wbr><a class='mod' href=''>authenc</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-87' class='srclink' href='../../../../src/sodium_sys/crypto/asymmetrickey/authenc.rs.html#1-972' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Using public-key authenticated encryption, Bob can encrypt a confidential
+message specifically for Alice, using Alice&#39;s public key.</p>
+
+<p>Using Bob&#39;s public key, Alice can verify that the encrypted message was
+actually created by Bob and was not tampered with, before eventually
+decrypting it.</p>
+
+<p>Alice only needs Bob&#39;s public key, the nonce and the ciphertext. Bob should
+never ever share his secret key, even with Alice.</p>
+
+<p>And in order to send messages to Alice, Bob only needs Alice&#39;s public key.
+Alice should never ever share her secret key either, even with Bob.</p>
+
+<p>Alice can reply to Bob using the same system, without having to generate a
+distinct key pair.</p>
+
+<p>The nonce doesn&#39;t have to be confidential, but it should be used with just
+one invokation of <em>open_easy()</em> for a particular pair of public and secret
+keys.</p>
+
+<p>One easy way to generate a nonce is to use the Nonce struct, considering the
+size of nonces the risk of any random collisions is negligible. For some
+applications, if you wish to use nonces to detect missing messages or to
+ignore replayed messages, it is also ok to use a simple incrementing counter
+as a nonce.</p>
+
+<p>When doing so you must ensure that the same value can never be re-used (for
+example you may have multiple threads or even hosts generating messages
+using the same key pairs).</p>
+
+<p>This system provides mutual authentication. However, a typical use case is
+to secure communications between a server, whose public key is known in
+advance, and clients connecting anonymously.</p>
+</div><h2 id='constants' class='section-header'><a href="#constants">Constants</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='constant' href='constant.BEFORENMBYTES.html'
+                               title='sodium_sys::crypto::asymmetrickey::authenc::BEFORENMBYTES'>BEFORENMBYTES</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='constant' href='constant.BOXZEROBYTES.html'
+                               title='sodium_sys::crypto::asymmetrickey::authenc::BOXZEROBYTES'>BOXZEROBYTES</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='constant' href='constant.MACBYTES.html'
+                               title='sodium_sys::crypto::asymmetrickey::authenc::MACBYTES'>MACBYTES</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='constant' href='constant.NONCEBYTES.html'
+                               title='sodium_sys::crypto::asymmetrickey::authenc::NONCEBYTES'>NONCEBYTES</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='constant' href='constant.PUBLICKEYBYTES.html'
+                               title='sodium_sys::crypto::asymmetrickey::authenc::PUBLICKEYBYTES'>PUBLICKEYBYTES</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='constant' href='constant.SECRETKEYBYTES.html'
+                               title='sodium_sys::crypto::asymmetrickey::authenc::SECRETKEYBYTES'>SECRETKEYBYTES</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='constant' href='constant.SEEDBYTES.html'
+                               title='sodium_sys::crypto::asymmetrickey::authenc::SEEDBYTES'>SEEDBYTES</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='constant' href='constant.ZEROBYTES.html'
+                               title='sodium_sys::crypto::asymmetrickey::authenc::ZEROBYTES'>ZEROBYTES</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.open.html'
+                               title='sodium_sys::crypto::asymmetrickey::authenc::open'>open</a></td>
+                        <td class='docblock short'>
+                             <p>The <em>open()</em> function verifies and decrypts a ciphertext produced by
+<em>seal()</em>.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.open_detached.html'
+                               title='sodium_sys::crypto::asymmetrickey::authenc::open_detached'>open_detached</a></td>
+                        <td class='docblock short'>
+                             <p>This function verifies and decrypts an encrypted message after verifying
+the given mac, and returns the decrypted message result.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.open_detached_with_ssk.html'
+                               title='sodium_sys::crypto::asymmetrickey::authenc::open_detached_with_ssk'>open_detached_with_ssk</a></td>
+                        <td class='docblock short'>
+                             <p>This function verifies and decrypts an encrypted message after verifying
+the given mac, and returns the decrypted message result.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.open_nacl.html'
+                               title='sodium_sys::crypto::asymmetrickey::authenc::open_nacl'>open_nacl</a></td>
+                        <td class='docblock short'>
+                             <p>The <em>open_nacl()</em> function decrypts a ciphertext produced by <em>seal_nacl()</em>.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.open_nacl_with_ssk.html'
+                               title='sodium_sys::crypto::asymmetrickey::authenc::open_nacl_with_ssk'>open_nacl_with_ssk</a></td>
+                        <td class='docblock short'>
+                             <p>The <em>open_nacl_with_ssk()</em> function decrypts a ciphertext produced by
+<em>seal_nacl_with_ssk()</em>.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.open_with_ssk.html'
+                               title='sodium_sys::crypto::asymmetrickey::authenc::open_with_ssk'>open_with_ssk</a></td>
+                        <td class='docblock short'>
+                             <p>The <em>open_with_ssk()</em> function verifies and decrypts a ciphertext produced
+by <em>seal_with_ssk()</em>.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.seal.html'
+                               title='sodium_sys::crypto::asymmetrickey::authenc::seal'>seal</a></td>
+                        <td class='docblock short'>
+                             <p>The <em>seal()</em> function encrypts a message with a recipient&#39;s public key, a
+sender&#39;s secret key and a nonce.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.seal_detached.html'
+                               title='sodium_sys::crypto::asymmetrickey::authenc::seal_detached'>seal_detached</a></td>
+                        <td class='docblock short'>
+                             <p>This function encrypts a message with a recipients public key, your secret
+key and a nonce, and returns a tuple of byte arrays. The first element is
+the ciphertext, the second is the mac.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.seal_detached_with_ssk.html'
+                               title='sodium_sys::crypto::asymmetrickey::authenc::seal_detached_with_ssk'>seal_detached_with_ssk</a></td>
+                        <td class='docblock short'>
+                             <p>This function encrypts a message with a shared secret key, and a nonce, and
+returns a tuple of byte arrays. The first element is the ciphertext, the
+second is the mac.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.seal_nacl.html'
+                               title='sodium_sys::crypto::asymmetrickey::authenc::seal_nacl'>seal_nacl</a></td>
+                        <td class='docblock short'>
+                             <p>The <em>seal_nacl()</em> function encrypts a message with a recipient&#39;s public key,
+a sender&#39;s secret key and a nonce.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.seal_nacl_with_ssk.html'
+                               title='sodium_sys::crypto::asymmetrickey::authenc::seal_nacl_with_ssk'>seal_nacl_with_ssk</a></td>
+                        <td class='docblock short'>
+                             <p>The <em>seal_nacl_with_ssk()</em> function encrypts a message with a shared secret
+key and a nonce.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.seal_with_ssk.html'
+                               title='sodium_sys::crypto::asymmetrickey::authenc::seal_with_ssk'>seal_with_ssk</a></td>
+                        <td class='docblock short'>
+                             <p>The <em>seal_with_ssk()</em> function encrypts a message with a pre-calculated
+shared secret key and a nonce.</p>
+
+                        </td>
+                    </tr>
+                </table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='type' href='type.SealDetachedResult.html'
+                               title='sodium_sys::crypto::asymmetrickey::authenc::SealDetachedResult'>SealDetachedResult</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../../";
+        window.currentCrate = "sodium_sys";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../../jquery.js"></script>
+    <script src="../../../../main.js"></script>
+    
+    <script defer src="../../../../search-index.js"></script>
+</body>
+</html>

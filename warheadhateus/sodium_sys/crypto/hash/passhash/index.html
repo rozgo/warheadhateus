@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `passhash` mod in crate `sodium_sys`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, passhash">
+
+    <title>sodium_sys::crypto::hash::passhash - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../../index.html'>sodium_sys</a>::<wbr><a href='../../index.html'>crypto</a>::<wbr><a href='../index.html'>hash</a></p><script>window.sidebarCurrent = {name: 'passhash', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Module <a href='../../../index.html'>sodium_sys</a>::<wbr><a href='../../index.html'>crypto</a>::<wbr><a href='../index.html'>hash</a>::<wbr><a class='mod' href=''>passhash</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-582' class='srclink' href='../../../../src/sodium_sys/crypto/hash/passhash.rs.html#1-354' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Secret keys used to encrypt or sign confidential data have to be chosen from
+ a very large keyspace. However, passwords are usually short, human-generated
+ strings, making dictionary attacks practical.</p>
+
+<p>The pwhash operation derives a secret key of any size from a password and a
+salt.</p>
+
+<ul>
+<li>The generated key has the size defined by the application, no matter what
+the password length is.</li>
+<li>The same password hashed with same parameters will always produce the same
+key.</li>
+<li>The same password hashed with different salts will produce different keys.</li>
+<li><p>The function deriving a key from a password and a salt is CPU intensive
+and intentionally requires a fair amount of memory. Therefore, it mitigates
+brute-force attacks by requiring a significant effort to verify each
+password.</p>
+
+<p>Common use cases:</p></li>
+<li><p>Protecting an on-disk secret key with a password,</p></li>
+<li><p>Password storage, or rather: storing what it takes to verify a password
+without having to store the actual password.</p>
+
+<h1 id='notes' class='section-header'><a href='#notes'>Notes</a></h1>
+<p>Do not forget to initialize the library with <em>init()</em>. The <em>pwhash</em>
+functions will still work without doing so, but possibly way slower.</p>
+
+<p>Do not use constants (including OPSLIMIT_* and MEMLIMIT_*) in order to
+verify a password. Save the parameters along with the hash instead, and use
+these saved parameters for the verification.</p>
+
+<p>Alternatively, use <em>pwhash()</em> and <em>pwhash_verify()</em>, that automatically take
+care of including and extracting the parameters.</p>
+
+<p>By doing so, passwords can be rehashed using different parameters if
+required later on.</p>
+
+<p>Cleartext passwords should not stay in memory longer than needed.</p>
+
+<p>It is highly recommended to use <em>mlock()</em> to lock memory regions storing
+cleartext passwords, and to call <em>munlock()</em> right after <em>pwhash()</em> and
+<em>pwhash_verify()</em> return.</p>
+
+<p>By design, a password whose length is 65 bytes or more is reduced to
+SHA-256(password). This can have security implications if the password is
+present in another password database using raw, unsalted SHA-256. Or when
+upgrading passwords previously hashed with unsalted SHA-256 to scrypt.</p>
+
+<p>If this is a concern, passwords should be pre-hashed before being hashed
+using scrypt:</p>
+
+<h1 id='guidelines-for-choosing-scrypt-parameters' class='section-header'><a href='#guidelines-for-choosing-scrypt-parameters'>Guidelines for choosing scrypt parameters</a></h1>
+<p>Start by determining how much memory can be used the scrypt function. What
+will be the highest number of threads/processes evaluating the function
+simultaneously (ideally, no more than 1 per CPU core)? How much physical
+memory is guaranteed to be available?</p>
+
+<p>memlimit should be a power of 2. Do not use anything less than 16 Mb, even
+for interactive use.</p>
+
+<p>Then, a reasonable starting point for opslimit is memlimit / 32.</p>
+
+<p>Measure how long the scrypt function needs in order to hash a password. If
+this it is way too long for your application, reduce memlimit and adjust
+opslimit using the above formula.</p>
+
+<p>If the function is so fast that you can afford it to be more computationally
+intensive without any usability issues, increase opslimit.</p>
+
+<p>For online use (e.g. login in on a website), a 1 second computation is
+likely to be the acceptable maximum.</p>
+
+<p>For interactive use (e.g. a desktop application), a 5 second pause after
+having entered a password is acceptable if the password doesn&#39;t need to be
+entered more than once per session.</p>
+
+<p>For non-interactive use and infrequent use (e.g. restoring an encrypted
+backup), an even slower computation can be an option.</p>
+
+<p>But the best defense against brute-force password cracking remains using
+strong passwords. Libraries such as passwdqc can help enforce this.</p></li>
+</ul>
+</div><h2 id='constants' class='section-header'><a href="#constants">Constants</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='constant' href='constant.MEMLIMIT_INTERACTIVE.html'
+                               title='sodium_sys::crypto::hash::passhash::MEMLIMIT_INTERACTIVE'>MEMLIMIT_INTERACTIVE</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='constant' href='constant.MEMLIMIT_SENSITIVE.html'
+                               title='sodium_sys::crypto::hash::passhash::MEMLIMIT_SENSITIVE'>MEMLIMIT_SENSITIVE</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='constant' href='constant.OPSLIMIT_INTERACTIVE.html'
+                               title='sodium_sys::crypto::hash::passhash::OPSLIMIT_INTERACTIVE'>OPSLIMIT_INTERACTIVE</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='constant' href='constant.OPSLIMIT_SENSITIVE.html'
+                               title='sodium_sys::crypto::hash::passhash::OPSLIMIT_SENSITIVE'>OPSLIMIT_SENSITIVE</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='constant' href='constant.SALTBYTES.html'
+                               title='sodium_sys::crypto::hash::passhash::SALTBYTES'>SALTBYTES</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='constant' href='constant.STRBYTES.html'
+                               title='sodium_sys::crypto::hash::passhash::STRBYTES'>STRBYTES</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='constant' href='constant.STRPREFIX.html'
+                               title='sodium_sys::crypto::hash::passhash::STRPREFIX'>STRPREFIX</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.keygen.html'
+                               title='sodium_sys::crypto::hash::passhash::keygen'>keygen</a></td>
+                        <td class='docblock short'>
+                             <p>The <em>keygen()</em> function derives a key of the given length from a password
+and a salt.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.pwhash.html'
+                               title='sodium_sys::crypto::hash::passhash::pwhash'>pwhash</a></td>
+                        <td class='docblock short'>
+                             <p>The <em>pwhash()</em> function creates an ASCII encoded string, which includes:</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.pwhash_verify.html'
+                               title='sodium_sys::crypto::hash::passhash::pwhash_verify'>pwhash_verify</a></td>
+                        <td class='docblock short'>
+                             <p>The <em>pwhash_verify()</em> function verifies that the given hash is a valid
+password verification string (as generated by <em>pwhash()</em>) for the given
+password.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.scrypt.html'
+                               title='sodium_sys::crypto::hash::passhash::scrypt'>scrypt</a></td>
+                        <td class='docblock short'>
+                             <p>The traditional, low-level scrypt API is also available</p>
+
+                        </td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../../";
+        window.currentCrate = "sodium_sys";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../../jquery.js"></script>
+    <script src="../../../../main.js"></script>
+    
+    <script defer src="../../../../search-index.js"></script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Key","The key structure contains information necessary to create slices from raw parts."]]});

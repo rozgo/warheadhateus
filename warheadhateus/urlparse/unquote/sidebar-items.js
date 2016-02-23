@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["unquote","Replaces %xx escapes by their single-character equivalent."],["unquote_plus","Like unquote(), but also replaces plus signs by spaces, as required for unquoting HTML form values."]]});

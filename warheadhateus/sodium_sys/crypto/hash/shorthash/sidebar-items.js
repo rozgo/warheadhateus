@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["BYTES",""],["KEYBYTES",""]],"fn":[["hash","Compute a fixed-size (*BYTES* bytes) fingerprint for the message using the key k."]]});
