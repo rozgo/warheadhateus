@@ -50,7 +50,7 @@
 //! const ACCESS_KEY_ID: &'static str = "AKIAIOSFODNN7EXAMPLE";
 //! const SECRET_ACCESS_KEY: &'static str = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY";
 //! const HOST: &'static str = "examplebucket.s3.amazonaws.com";
-//! const AWS_TEST_1: &'static str = "Authorization: AWS4-HMAC-SHA256 \
+//! const AWS_TEST_1: &'static str = "AWS4-HMAC-SHA256 \
 //! Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request,\
 //! SignedHeaders=host;range;x-amz-content-sha256;x-amz-date,\
 //! Signature=f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd91039c6036bdb41";
@@ -110,12 +110,14 @@ extern crate sodium_sys;
 extern crate urlparse;
 
 mod error;
+mod mode;
 mod region;
 mod service;
 mod utils;
 
 use chrono::{DateTime, UTC};
 use error::AWSAuthError;
+pub use mode::Mode;
 pub use region::Region;
 use rustc_serialize::hex::ToHex;
 pub use service::Service;
@@ -142,6 +144,7 @@ fn init() {
 
 /// Amazon Web Service Authorization Header struct
 pub struct AWSAuth {
+    mode: Mode,
     req_type: HttpRequestMethod,
     path: String,
     query: String,
@@ -153,11 +156,13 @@ pub struct AWSAuth {
     service: Service,
     headers: HashMap<String, String>,
     payload_hash: String,
+    chunk_size: u32,
 }
 
 impl Default for AWSAuth {
     fn default() -> AWSAuth {
         AWSAuth {
+            mode: Mode::Normal,
             req_type: HttpRequestMethod::GET,
             path: String::new(),
             query: String::new(),
@@ -169,6 +174,7 @@ impl Default for AWSAuth {
             service: Service::S3,
             headers: HashMap::new(),
             payload_hash: String::new(),
+            chunk_size: 0,
         }
     }
 }
@@ -201,10 +207,27 @@ impl AWSAuth {
         self
     }
 
+    /// Set the chunk size.
+    /// * Note this is only used when Mode::Chunk is selected.
+    /// * Chunk size must be at least 8 KB. We recommend a chunk size of a least 64 KB for better
+    /// performance. This chunk size applies to all chunk except the last one. The last chunk you
+    /// send can be smaller than 8 KB. If your payload is small and can fit in one chunk, then it
+    /// can be smaller than the 8 KB.
+    pub fn set_chunk_size(&mut self, chunk_size: u32) -> &mut AWSAuth {
+        self.chunk_size = chunk_size;
+        self
+    }
+
     /// Set the scope date for the auth request.  Request are valid for 7 days from the given date.
     /// * Note that this date doesn't have to match the *x-amz-date* or *date* header values.
     pub fn set_date(&mut self, date: DateTime<UTC>) -> &mut AWSAuth {
         self.date = date;
+        self
+    }
+
+    /// Set the mode of operation.
+    pub fn set_mode(&mut self, mode: Mode) -> &mut AWSAuth {
+        self.mode = mode;
         self
     }
 
@@ -328,14 +351,19 @@ impl AWSAuth {
         buf
     }
 
-    fn signature(&self) -> AWSAuthResult {
+    fn signature(&self, seed: bool) -> AWSAuthResult {
+        let hash = if seed {
+            "STREAMING-AWS4-HMAC-SHA256-PAYLOAD"
+        } else {
+            &self.payload_hash[..]
+        };
         let canonical_request = format!("{}\n{}\n{}\n{}\n{}\n{}",
                                         self.req_type,
                                         try!(self.canonical_uri()),
                                         try!(self.canonical_query_string()),
                                         self.canonical_headers(),
                                         self.signed_headers(),
-                                        self.payload_hash);
+                                        hash);
         debug!("CanonicalRequest\n{}", canonical_request);
         let string_to_sign = format!("{}\n{}\n{}\n{}",
                                      self.sam,
@@ -344,14 +372,14 @@ impl AWSAuth {
                                      try!(utils::hashed_data(Some(&canonical_request))));
         debug!("StringToSign\n{}", string_to_sign);
 
-        let mut seed = String::from("AWS4");
-        seed.push_str(&self.secret_access_key);
+        let mut key = String::from("AWS4");
+        key.push_str(&self.secret_access_key);
 
         let date = self.date.format(DATE_FMT).to_string();
         let region = self.region.to_string();
         let service = self.service.to_string();
         let aws4 = AWS4_REQUEST.as_bytes();
-        let date_key = try!(utils::signed_data(date.as_bytes(), seed.as_bytes()));
+        let date_key = try!(utils::signed_data(date.as_bytes(), key.as_bytes()));
         let date_region_key = try!(utils::signed_data(region.as_bytes(), &date_key));
         let date_region_service_key = try!(utils::signed_data(service.as_bytes(),
                                                               &date_region_key));
@@ -364,11 +392,49 @@ impl AWSAuth {
     /// Create the AWS S3 Authorization HTTP header.
     pub fn auth_header(&self) -> AWSAuthResult {
         init();
-        Ok(format!("Authorization: {} Credential={},SignedHeaders={},Signature={}",
-                   self.sam,
-                   self.credential(),
-                   self.signed_headers(),
-                   try!(self.signature())))
+        match self.mode {
+            Mode::Normal => {
+                Ok(format!("{} Credential={},SignedHeaders={},Signature={}",
+                           self.sam,
+                           self.credential(),
+                           self.signed_headers(),
+                           try!(self.signature(false))))
+            }
+            Mode::Chunked => {
+                use std::io::{self, Write};
+                let seed = try!(self.signature(true));
+                writeln!(io::stdout(), "SEED: {}", seed).expect("Unable to write to stdout!");
+                Ok("Not Implemented".to_owned())
+            }
+        }
+    }
+
+    /// Generate the value for the 'Content-Length' header when using chunked mode.
+    pub fn content_length(&self, payload_size: u32) -> Result<usize, AWSAuthError> {
+        let mut remaining = payload_size;
+        let mut length = 0;
+
+        loop {
+            if remaining < self.chunk_size {
+                length += remaining as usize;
+                length += format!("{:x}", remaining).len();
+            } else {
+                length += self.chunk_size as usize;
+                length += format!("{:x}", self.chunk_size).len();
+            }
+            // Len(";chunk-signature=") (17) + Signature Length (64) + 2*/r/n (4)
+            length += 85;
+
+            if remaining == 0 {
+                break;
+            }
+            remaining = match remaining.checked_sub(self.chunk_size) {
+                Some(r) => r,
+                None => 0,
+            };
+        }
+
+        Ok(length)
     }
 }
 
@@ -433,6 +499,8 @@ impl fmt::Display for HttpRequestMethod {
 mod tests {
     use chrono::UTC;
     use chrono::offset::TimeZone;
+    use error::AWSAuthError;
+    use mode::Mode;
     use region::Region;
     use service::Service;
     use std::io::{self, Write};
@@ -444,28 +512,51 @@ mod tests {
     const SECRET_ACCESS_KEY: &'static str = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY";
     const HOST: &'static str = "examplebucket.s3.amazonaws.com";
 
-    const AWS_TEST_1: &'static str = "Authorization: AWS4-HMAC-SHA256 \
+    const AWS_TEST_1: &'static str = "AWS4-HMAC-SHA256 \
                                       Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_r\
                                       equest,SignedHeaders=host;range;x-amz-content-sha256;\
                                       x-amz-date,\
                                       Signature=f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd9\
                                       1039c6036bdb41";
-    const AWS_TEST_2: &'static str = "Authorization: AWS4-HMAC-SHA256 \
+    const AWS_TEST_2: &'static str = "AWS4-HMAC-SHA256 \
                                       Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_r\
                                       equest,SignedHeaders=date;host;x-amz-content-sha256;\
                                       x-amz-date;x-amz-storage-class,\
                                       Signature=98ad721746da40c64f1a55b78f14c238d841ea1380cd77a1b5\
                                       971af0ece108bd";
-    const AWS_TEST_3: &'static str = "Authorization: AWS4-HMAC-SHA256 \
+    const AWS_TEST_3: &'static str = "AWS4-HMAC-SHA256 \
                                       Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_r\
                                       equest,SignedHeaders=host;x-amz-content-sha256;x-amz-date,\
                                       Signature=fea454ca298b7da1c68078a5d1bdbfbbe0d65c699e0f91ac7a\
                                       200a0136783543";
-    const AWS_TEST_4: &'static str = "Authorization: AWS4-HMAC-SHA256 \
+    const AWS_TEST_4: &'static str = "AWS4-HMAC-SHA256 \
                                       Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_r\
                                       equest,SignedHeaders=host;x-amz-content-sha256;x-amz-date,\
                                       Signature=34b48302e7b5fa45bde8084f4b7868a86f0a534bc59db6670e\
                                       d5711ef69dc6f7";
+
+    fn test_cl(auth: &mut AWSAuth,
+               chunk_size: u32,
+               payload_size: u32)
+               -> Result<usize, AWSAuthError> {
+        auth.set_chunk_size(chunk_size);
+        Ok(try!(auth.content_length(payload_size)))
+    }
+
+    #[test]
+    fn test_content_length() {
+        match AWSAuth::new("") {
+            Ok(ref mut auth) => {
+                assert!(test_cl(auth, 65536, 66560).expect("") == 66824);
+                assert!(test_cl(auth, 1024, 1024).expect("") == 1198);
+                assert!(test_cl(auth, 1024, 2048).expect("") == 2310);
+            }
+            Err(e) => {
+                writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
+                assert!(false);
+            }
+        }
+    }
 
     #[test]
     fn test_get_object() {
@@ -619,6 +710,45 @@ mod tests {
                 auth.add_header("HOST", HOST);
                 auth.add_header("x-amz-content-sha256", &payload_hash);
                 auth.add_header("x-amz-date", SCOPE_DATE);
+
+                match auth.auth_header() {
+                    Ok(ah) => {
+                        writeln!(io::stdout(), "{}", ah).expect("Unable to write to stdout!");
+                        assert!(ah == AWS_TEST_4)
+                    }
+                    Err(e) => {
+                        writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
+                        assert!(false);
+                    }
+                }
+            }
+            Err(e) => {
+                writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
+                assert!(false);
+            }
+        }
+    }
+
+    #[test]
+    fn test_put_object_chunked() {
+        match AWSAuth::new("https://s3.amazonaws.com/examplebucket/chunkObject.txt") {
+            Ok(mut auth) => {
+                let scope_date = UTC.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT)
+                                    .expect("Unable to parse date!");
+                auth.set_mode(Mode::Chunked);
+                auth.set_request_type(HttpRequestMethod::PUT);
+                auth.set_date(scope_date);
+                auth.set_service(Service::S3);
+                auth.set_access_key_id(ACCESS_KEY_ID);
+                auth.set_secret_access_key(SECRET_ACCESS_KEY);
+                auth.set_region(Region::UsEast1);
+                auth.add_header("HOST", "s3.amazonaws.com");
+                auth.add_header("Content-Encoding", "aws-chunked");
+                auth.add_header("x-amz-content-sha256", "STREAMING-AWS4-HMAC-SHA256-PAYLOAD");
+                auth.add_header("x-amz-storage-class", "REDUCED_REDUNDANCY");
+                auth.add_header("x-amz-date", SCOPE_DATE);
+                auth.add_header("x-amz-decoded-content-length", "66560");
+                auth.add_header("Content-Length", "66824");
 
                 match auth.auth_header() {
                     Ok(ah) => {
