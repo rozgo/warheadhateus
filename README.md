@@ -3,6 +3,11 @@ AWS Authorization Header Generation (AWS Signature Version 4)
 
 You may wonder about the name.  It's an anagram of "awsauthheader".
 
+## Status
+[![Crates.io](https://img.shields.io/crates/v/warheadhateus.svg)](https://crates.io/crates/warheadhateus)
+[![Build Status](https://travis-ci.org/rustyhorde/warheadhateus.svg?branch=master)](https://travis-ci.org/rustyhorde/warheadhateus)
+[![Coverage Status](https://coveralls.io/repos/github/rustyhorde/warheadhateus/badge.svg?branch=master)](https://coveralls.io/github/rustyhorde/warheadhateus?branch=master)
+
 ## License
 
 Licensed under either of
