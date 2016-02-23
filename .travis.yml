@@ -16,13 +16,10 @@ os:
 matrix:
   allow_failures:
     - rust: nightly
-services:
-  - mysql
 before_script:
   - |
       pip install 'travis-cargo<0.2' --user &&
-      export PATH=$HOME/.local/bin:$PATH &&
-      mysql -e 'create database log_test;'
+      export PATH=$HOME/.local/bin:$PATH
 script:
   - |
       travis-cargo --only nightly build -- --features lint &&
