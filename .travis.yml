@@ -1,0 +1,39 @@
+language: rust
+sudo: false
+addons:
+  apt:
+    packages:
+      - libcurl4-openssl-dev
+      - libelf-dev
+      - libdw-dev
+      - binutils-dev
+rust:
+  - stable
+  - beta
+  - nightly
+os:
+  - linux
+matrix:
+  allow_failures:
+    - rust: nightly
+services:
+  - mysql
+before_script:
+  - |
+      pip install 'travis-cargo<0.2' --user &&
+      export PATH=$HOME/.local/bin:$PATH &&
+      mysql -e 'create database log_test;'
+script:
+  - |
+      travis-cargo --only nightly build -- --features lint &&
+      travis-cargo --only nightly test -- --features lint &&
+      travis-cargo --skip nightly build &&
+      travis-cargo --skip nightly test &&
+      travis-cargo --only stable doc
+after_success:
+  - travis-cargo coveralls --no-sudo --verify
+  - ./scripts/travis-doc-upload.sh
+env:
+  global:
+    # override the default `--features unstable` used for the nightly branch (optional)
+    - TRAVIS_CARGO_NIGHTLY_FEATURE=""
