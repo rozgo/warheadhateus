@@ -20,7 +20,7 @@ const AWS_TEST_5: &'static str = "AWS4-HMAC-SHA256 \
                                  Signature=4f232c4386841ef735655705268965c44a0e4690baa4adea15\
                                  3f7db9fa80a0a9";
 
-fn test_cl(auth: &mut AWSAuth, chunk_size: u32, payload_size: u32) -> Result<usize, AWSAuthError> {
+fn test_cl(auth: &mut AWSAuth, chunk_size: usize, payload_size: usize) -> Result<usize, AWSAuthError> {
     auth.set_chunk_size(chunk_size);
     Ok(try!(auth.content_length(payload_size)))
 }
@@ -55,7 +55,7 @@ fn test_content_length() {
 }
 
 #[test]
-fn test_auth_headed() {
+fn test_auth_header() {
     let auth = get_auth().unwrap_or_else(|e| fail(e));
     let ah = auth.auth_header().unwrap_or_else(|e| fail(e));
     assert!(ah == AWS_TEST_5);
