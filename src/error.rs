@@ -8,6 +8,7 @@ use std::string::FromUtf8Error;
 pub enum AWSAuthError {
     Nacl(sodium_sys::SSError),
     ParseError(FromUtf8Error),
+    ModeError,
 }
 
 impl Error for AWSAuthError {
@@ -15,6 +16,7 @@ impl Error for AWSAuthError {
         match *self {
             AWSAuthError::Nacl(_) => "Sodium SSError",
             AWSAuthError::ParseError(ref e) => e.description(),
+            AWSAuthError::ModeError => "ModeError",
         }
     }
 }
@@ -24,6 +26,7 @@ impl fmt::Display for AWSAuthError {
         let display = match *self {
             AWSAuthError::Nacl(_) => "SSError",
             AWSAuthError::ParseError(_) => "ParseError",
+            AWSAuthError::ModeError => "ModeError",
         };
         write!(f, "{}", display)
     }

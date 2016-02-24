@@ -351,6 +351,24 @@ impl AWSAuth {
         buf
     }
 
+    fn sign_string(&self, string_to_sign: &str) -> AWSAuthResult {
+        let mut key = String::from("AWS4");
+        key.push_str(&self.secret_access_key);
+
+        let date = self.date.format(DATE_FMT).to_string();
+        let region = self.region.to_string();
+        let service = self.service.to_string();
+        let aws4 = AWS4_REQUEST.as_bytes();
+        let date_key = try!(utils::signed_data(date.as_bytes(), key.as_bytes()));
+        let date_region_key = try!(utils::signed_data(region.as_bytes(), &date_key));
+        let date_region_service_key = try!(utils::signed_data(service.as_bytes(),
+                                                              &date_region_key));
+        let signing_key = try!(utils::signed_data(aws4, &date_region_service_key));
+        let signature = try!(utils::signed_data(string_to_sign.as_bytes(), &signing_key));
+        debug!("Signature\n{}", signature.to_hex());
+        Ok(signature.to_hex())
+    }
+
     fn signature(&self, seed: bool) -> AWSAuthResult {
         let hash = if seed {
             "STREAMING-AWS4-HMAC-SHA256-PAYLOAD"
@@ -369,44 +387,69 @@ impl AWSAuth {
                                      self.sam,
                                      self.date.format(DATE_TIME_FMT),
                                      self.scope(),
-                                     try!(utils::hashed_data(Some(&canonical_request))));
+                                     try!(utils::hashed_data(Some(canonical_request.as_bytes()))));
         debug!("StringToSign\n{}", string_to_sign);
 
-        let mut key = String::from("AWS4");
-        key.push_str(&self.secret_access_key);
-
-        let date = self.date.format(DATE_FMT).to_string();
-        let region = self.region.to_string();
-        let service = self.service.to_string();
-        let aws4 = AWS4_REQUEST.as_bytes();
-        let date_key = try!(utils::signed_data(date.as_bytes(), key.as_bytes()));
-        let date_region_key = try!(utils::signed_data(region.as_bytes(), &date_key));
-        let date_region_service_key = try!(utils::signed_data(service.as_bytes(),
-                                                              &date_region_key));
-        let signing_key = try!(utils::signed_data(aws4, &date_region_service_key));
-        let signature = try!(utils::signed_data(string_to_sign.as_bytes(), &signing_key));
-        debug!("Signature\n{}", signature.to_hex());
-        Ok(signature.to_hex())
+        self.sign_string(&string_to_sign)
     }
 
     /// Create the AWS S3 Authorization HTTP header.
     pub fn auth_header(&self) -> AWSAuthResult {
         init();
+        let signature = match self.mode {
+            Mode::Normal => try!(self.signature(false)),
+            Mode::Chunked => try!(self.signature(true)),
+        };
+        Ok(format!("{} Credential={},SignedHeaders={},Signature={}",
+                   self.sam,
+                   self.credential(),
+                   self.signed_headers(),
+                   signature))
+    }
+
+    /// Generate the seed signature for chunked mode.
+    pub fn seed_signature(&self) -> AWSAuthResult {
         match self.mode {
-            Mode::Normal => {
-                Ok(format!("{} Credential={},SignedHeaders={},Signature={}",
-                           self.sam,
-                           self.credential(),
-                           self.signed_headers(),
-                           try!(self.signature(false))))
-            }
-            Mode::Chunked => {
-                use std::io::{self, Write};
-                let seed = try!(self.signature(true));
-                writeln!(io::stdout(), "SEED: {}", seed).expect("Unable to write to stdout!");
-                Ok("Not Implemented".to_owned())
-            }
+            Mode::Chunked => Ok(try!(self.signature(true))),
+            _ => Err(AWSAuthError::ModeError),
         }
+    }
+
+    /// Generate the chunk signature for a given chunk.
+    pub fn chunk_signature(&self, previous_signature: &str, chunk: &[u8]) -> AWSAuthResult {
+        match self.mode {
+            Mode::Chunked => {
+                let hashed_chunk = if chunk.len() == 0 {
+                    try!(utils::hashed_data(None))
+                } else {
+                    try!(utils::hashed_data(Some(chunk)))
+                };
+                let string_to_sign = format!("{}\n{}\n{}\n{}\n{}\n{}",
+                                             "AWS4-HMAC-SHA256-PAYLOAD",
+                                             self.date.format(DATE_TIME_FMT),
+                                             self.scope(),
+                                             previous_signature,
+                                             try!(utils::hashed_data(None)),
+                                             hashed_chunk);
+                debug!("StringToSign\n{}", string_to_sign);
+                Ok(try!(self.sign_string(&string_to_sign)))
+            }
+            _ => Err(AWSAuthError::ModeError),
+        }
+    }
+
+    /// Generate the chunk body for a given chunk.
+    pub fn chunk_body(&self, chunk_signature: &str, chunk: &[u8]) -> Result<Vec<u8>, AWSAuthError> {
+        let hex = format!("{:x}", chunk.len());
+        let capacity = hex.len() + 85 + chunk.len();
+        let mut buf = Vec::with_capacity(capacity);
+        buf.extend(hex.as_bytes());
+        buf.extend_from_slice(b";chunk-signature=");
+        buf.extend(chunk_signature.as_bytes());
+        buf.extend_from_slice(b"\r\n");
+        buf.extend_from_slice(chunk);
+        buf.extend_from_slice(b"\r\n");
+        Ok(buf)
     }
 
     /// Generate the value for the 'Content-Length' header when using chunked mode.
@@ -534,6 +577,21 @@ mod tests {
                                       equest,SignedHeaders=host;x-amz-content-sha256;x-amz-date,\
                                       Signature=34b48302e7b5fa45bde8084f4b7868a86f0a534bc59db6670e\
                                       d5711ef69dc6f7";
+    const AWS_TEST_5: &'static str = "AWS4-HMAC-SHA256 \
+                                      Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_r\
+                                      equest,SignedHeaders=content-encoding;content-length;host;\
+                                      x-amz-content-sha256;x-amz-date;\
+                                      x-amz-decoded-content-length;x-amz-storage-class,\
+                                      Signature=4f232c4386841ef735655705268965c44a0e4690baa4adea15\
+                                      3f7db9fa80a0a9";
+    const SEED_SIG: &'static str = "4f232c4386841ef735655705268965c44a0e4690baa4adea153f7db9fa80a0\
+                                    a9";
+    const CHUNK_SIG_1: &'static str = "ad80c730a21e5b8d04586a2213dd63b9a0e99e0e2307b0ade35a65485a2\
+                                       88648";
+    const CHUNK_SIG_2: &'static str = "0055627c9e194cb4542bae2aa5492e3c1575bbb81b612b7d234b86a503e\
+                                       f5497";
+    const CHUNK_SIG_3: &'static str = "b6c6ea8a5354eaf15b3cb7646744f4275b71ea724fed81ceb9323e279d4\
+                                       49df9";
 
     fn test_cl(auth: &mut AWSAuth,
                chunk_size: u32,
@@ -584,10 +642,7 @@ mod tests {
                 auth.add_header("Range", "bytes=0-9");
 
                 match auth.auth_header() {
-                    Ok(ah) => {
-                        writeln!(io::stdout(), "{}", ah).expect("Unable to write to stdout!");
-                        assert!(ah == AWS_TEST_1)
-                    }
+                    Ok(ah) => assert!(ah == AWS_TEST_1),
                     Err(e) => {
                         writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
                         assert!(false);
@@ -605,7 +660,7 @@ mod tests {
     fn test_put_object() {
         match AWSAuth::new("https://examplebucket.s3.amazonaws.com/test$file.text") {
             Ok(mut auth) => {
-                let payload_hash = match hashed_data(Some("Welcome to Amazon S3.")) {
+                let payload_hash = match hashed_data(Some(b"Welcome to Amazon S3.")) {
                     Ok(ph) => ph,
                     Err(e) => {
                         writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
@@ -628,10 +683,7 @@ mod tests {
                 auth.add_header("x-amz-date", SCOPE_DATE);
 
                 match auth.auth_header() {
-                    Ok(ah) => {
-                        writeln!(io::stdout(), "{}", ah).expect("Unable to write to stdout!");
-                        assert!(ah == AWS_TEST_2)
-                    }
+                    Ok(ah) => assert!(ah == AWS_TEST_2),
                     Err(e) => {
                         writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
                         assert!(false);
@@ -670,10 +722,7 @@ mod tests {
                 auth.add_header("x-amz-date", SCOPE_DATE);
 
                 match auth.auth_header() {
-                    Ok(ah) => {
-                        writeln!(io::stdout(), "{}", ah).expect("Unable to write to stdout!");
-                        assert!(ah == AWS_TEST_3)
-                    }
+                    Ok(ah) => assert!(ah == AWS_TEST_3),
                     Err(e) => {
                         writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
                         assert!(false);
@@ -712,10 +761,7 @@ mod tests {
                 auth.add_header("x-amz-date", SCOPE_DATE);
 
                 match auth.auth_header() {
-                    Ok(ah) => {
-                        writeln!(io::stdout(), "{}", ah).expect("Unable to write to stdout!");
-                        assert!(ah == AWS_TEST_4)
-                    }
+                    Ok(ah) => assert!(ah == AWS_TEST_4),
                     Err(e) => {
                         writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
                         assert!(false);
@@ -730,6 +776,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg_attr(feature = "clippy", allow(cyclomatic_complexity))]
     fn test_put_object_chunked() {
         match AWSAuth::new("https://s3.amazonaws.com/examplebucket/chunkObject.txt") {
             Ok(mut auth) => {
@@ -742,6 +789,7 @@ mod tests {
                 auth.set_access_key_id(ACCESS_KEY_ID);
                 auth.set_secret_access_key(SECRET_ACCESS_KEY);
                 auth.set_region(Region::UsEast1);
+                auth.set_chunk_size(65536);
                 auth.add_header("HOST", "s3.amazonaws.com");
                 auth.add_header("Content-Encoding", "aws-chunked");
                 auth.add_header("x-amz-content-sha256", "STREAMING-AWS4-HMAC-SHA256-PAYLOAD");
@@ -751,9 +799,78 @@ mod tests {
                 auth.add_header("Content-Length", "66824");
 
                 match auth.auth_header() {
-                    Ok(ah) => {
-                        writeln!(io::stdout(), "{}", ah).expect("Unable to write to stdout!");
-                        assert!(!ah.is_empty())
+                    Ok(ah) => assert!(ah == AWS_TEST_5),
+                    Err(e) => {
+                        writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
+                        assert!(false);
+                    }
+                }
+
+                let mut seed_sig = String::new();
+                match auth.seed_signature() {
+                    Ok(ss) => {
+                        assert!(ss == SEED_SIG);
+                        seed_sig = ss;
+                    }
+                    Err(e) => {
+                        writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
+                        assert!(false);
+                    }
+                }
+
+                let many_a: Vec<u8> = vec![97; 65536];
+                let mut chunk_sig_1 = String::new();
+                match auth.chunk_signature(&seed_sig, &many_a) {
+                    Ok(sig) => {
+                        assert!(sig == CHUNK_SIG_1);
+                        match auth.chunk_body(&sig, &many_a) {
+                            Ok(b) => assert!(b.len() == 65626),
+                            Err(e) => {
+                                writeln!(io::stderr(), "{}", e)
+                                    .expect("Unable to write to stderr!");
+                                assert!(false);
+                            }
+                        }
+                        chunk_sig_1 = sig;
+                    }
+                    Err(e) => {
+                        writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
+                        assert!(false);
+                    }
+                }
+
+                let less_a = vec![97; 1024];
+                let mut chunk_sig_2 = String::new();
+                match auth.chunk_signature(&chunk_sig_1, &less_a) {
+                    Ok(sig) => {
+                        assert!(sig == CHUNK_SIG_2);
+                        match auth.chunk_body(&sig, &less_a) {
+                            Ok(b) => assert!(b.len() == 1112),
+                            Err(e) => {
+                                writeln!(io::stderr(), "{}", e)
+                                    .expect("Unable to write to stderr!");
+                                assert!(false);
+                            }
+                        }
+                        chunk_sig_2 = sig;
+                    }
+                    Err(e) => {
+                        writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
+                        assert!(false);
+                    }
+                }
+
+                match auth.chunk_signature(&chunk_sig_2, &[]) {
+                    Ok(sig) => {
+                        assert!(sig == CHUNK_SIG_3);
+                        match auth.chunk_body(&sig, &[]) {
+                            Ok(b) => assert!(b.len() == 86),
+                            Err(e) => {
+                                writeln!(io::stderr(), "{}", e)
+                                    .expect("Unable to write to stderr!");
+                                assert!(false);
+                            }
+                        }
                     }
                     Err(e) => {
                         writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
