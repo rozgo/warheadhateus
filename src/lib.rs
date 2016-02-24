@@ -8,6 +8,9 @@
 
 //! AWS Authorization Header Generation (AWS Signature Version 4)
 //!
+//! Currently this is implemented for S3 and passes all tests (See [Header Based Auth][1]).
+//! [1]: http://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
+//!
 //!     // ##      ##    ###    ########  ##     ## ########    ###    ########
 //!     // ##  ##  ##   ## ##   ##     ## ##     ## ##         ## ##   ##     ##
 //!     // ##  ##  ##  ##   ##  ##     ## ##     ## ##        ##   ##  ##     ##
@@ -116,13 +119,12 @@ mod service;
 mod utils;
 
 use chrono::{DateTime, UTC};
-use error::AWSAuthError;
+pub use error::AWSAuthError;
 pub use mode::Mode;
 pub use region::Region;
 use rustc_serialize::hex::ToHex;
 pub use service::Service;
 use sodium_sys::crypto::utils::init;
-use self::SAM::AWS4HMACSHA256;
 use std::collections::HashMap;
 use std::fmt;
 use std::sync::{ONCE_INIT, Once};
@@ -166,7 +168,7 @@ impl Default for AWSAuth {
             req_type: HttpRequestMethod::GET,
             path: String::new(),
             query: String::new(),
-            sam: AWS4HMACSHA256,
+            sam: SAM::AWS4HMACSHA256,
             access_key_id: String::new(),
             secret_access_key: String::new(),
             region: Region::UsEast1,
@@ -253,6 +255,12 @@ impl AWSAuth {
     /// Set the AWS Secret Access Key (this is supplied by Amazon).
     pub fn set_secret_access_key(&mut self, secret_access_key: &str) -> &mut AWSAuth {
         self.secret_access_key = secret_access_key.to_owned();
+        self
+    }
+
+    /// Set the Signing Algorithm Moniker used for this auth.
+    pub fn set_sam(&mut self, sam: SAM) -> &mut AWSAuth {
+        self.sam = sam;
         self
     }
 
@@ -425,7 +433,7 @@ impl AWSAuth {
                     try!(utils::hashed_data(Some(chunk)))
                 };
                 let string_to_sign = format!("{}\n{}\n{}\n{}\n{}\n{}",
-                                             "AWS4-HMAC-SHA256-PAYLOAD",
+                                             self.sam,
                                              self.date.format(DATE_TIME_FMT),
                                              self.scope(),
                                              previous_signature,
@@ -485,18 +493,21 @@ impl AWSAuth {
 pub enum SAM {
     /// AWS Signature Version 4, HMAC-SHA256
     AWS4HMACSHA256,
+    /// AWS Signature Version 4, HMAC-SHA256 Payload (used for chunked mode).
+    AWS4HMACSHA256PAYLOAD,
 }
 
 impl Default for SAM {
     fn default() -> SAM {
-        AWS4HMACSHA256
+        SAM::AWS4HMACSHA256
     }
 }
 
 impl<'a> Into<String> for &'a SAM {
     fn into(self) -> String {
         match *self {
-            AWS4HMACSHA256 => "AWS4-HMAC-SHA256".to_owned(),
+            SAM::AWS4HMACSHA256 => "AWS4-HMAC-SHA256".to_owned(),
+            SAM::AWS4HMACSHA256PAYLOAD => "AWS4-HMAC-SHA256-PAYLOAD".to_owned(),
         }
     }
 }
@@ -533,355 +544,5 @@ pub enum HttpRequestMethod {
 impl fmt::Display for HttpRequestMethod {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:?}", self)
-    }
-}
-
-#[cfg(test)]
-/// See [Header Based Auth][1]
-/// [1]: (http://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html)
-mod tests {
-    use chrono::UTC;
-    use chrono::offset::TimeZone;
-    use error::AWSAuthError;
-    use mode::Mode;
-    use region::Region;
-    use service::Service;
-    use std::io::{self, Write};
-    use super::{AWSAuth, DATE_TIME_FMT, HttpRequestMethod};
-    use utils::hashed_data;
-
-    const SCOPE_DATE: &'static str = "20130524T000000Z";
-    const ACCESS_KEY_ID: &'static str = "AKIAIOSFODNN7EXAMPLE";
-    const SECRET_ACCESS_KEY: &'static str = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY";
-    const HOST: &'static str = "examplebucket.s3.amazonaws.com";
-
-    const AWS_TEST_1: &'static str = "AWS4-HMAC-SHA256 \
-                                      Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_r\
-                                      equest,SignedHeaders=host;range;x-amz-content-sha256;\
-                                      x-amz-date,\
-                                      Signature=f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd9\
-                                      1039c6036bdb41";
-    const AWS_TEST_2: &'static str = "AWS4-HMAC-SHA256 \
-                                      Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_r\
-                                      equest,SignedHeaders=date;host;x-amz-content-sha256;\
-                                      x-amz-date;x-amz-storage-class,\
-                                      Signature=98ad721746da40c64f1a55b78f14c238d841ea1380cd77a1b5\
-                                      971af0ece108bd";
-    const AWS_TEST_3: &'static str = "AWS4-HMAC-SHA256 \
-                                      Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_r\
-                                      equest,SignedHeaders=host;x-amz-content-sha256;x-amz-date,\
-                                      Signature=fea454ca298b7da1c68078a5d1bdbfbbe0d65c699e0f91ac7a\
-                                      200a0136783543";
-    const AWS_TEST_4: &'static str = "AWS4-HMAC-SHA256 \
-                                      Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_r\
-                                      equest,SignedHeaders=host;x-amz-content-sha256;x-amz-date,\
-                                      Signature=34b48302e7b5fa45bde8084f4b7868a86f0a534bc59db6670e\
-                                      d5711ef69dc6f7";
-    const AWS_TEST_5: &'static str = "AWS4-HMAC-SHA256 \
-                                      Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_r\
-                                      equest,SignedHeaders=content-encoding;content-length;host;\
-                                      x-amz-content-sha256;x-amz-date;\
-                                      x-amz-decoded-content-length;x-amz-storage-class,\
-                                      Signature=4f232c4386841ef735655705268965c44a0e4690baa4adea15\
-                                      3f7db9fa80a0a9";
-    const SEED_SIG: &'static str = "4f232c4386841ef735655705268965c44a0e4690baa4adea153f7db9fa80a0\
-                                    a9";
-    const CHUNK_SIG_1: &'static str = "ad80c730a21e5b8d04586a2213dd63b9a0e99e0e2307b0ade35a65485a2\
-                                       88648";
-    const CHUNK_SIG_2: &'static str = "0055627c9e194cb4542bae2aa5492e3c1575bbb81b612b7d234b86a503e\
-                                       f5497";
-    const CHUNK_SIG_3: &'static str = "b6c6ea8a5354eaf15b3cb7646744f4275b71ea724fed81ceb9323e279d4\
-                                       49df9";
-
-    fn test_cl(auth: &mut AWSAuth,
-               chunk_size: u32,
-               payload_size: u32)
-               -> Result<usize, AWSAuthError> {
-        auth.set_chunk_size(chunk_size);
-        Ok(try!(auth.content_length(payload_size)))
-    }
-
-    #[test]
-    fn test_content_length() {
-        match AWSAuth::new("") {
-            Ok(ref mut auth) => {
-                assert!(test_cl(auth, 65536, 66560).expect("") == 66824);
-                assert!(test_cl(auth, 1024, 1024).expect("") == 1198);
-                assert!(test_cl(auth, 1024, 2048).expect("") == 2310);
-            }
-            Err(e) => {
-                writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
-                assert!(false);
-            }
-        }
-    }
-
-    #[test]
-    fn test_get_object() {
-        match AWSAuth::new("https://examplebucket.s3.amazonaws.com/test.txt") {
-            Ok(mut auth) => {
-                let payload_hash = match hashed_data(None) {
-                    Ok(ph) => ph,
-                    Err(e) => {
-                        writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
-                        "".to_owned()
-                    }
-                };
-                let scope_date = UTC.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT)
-                                    .expect("Unable to parse date!");
-                auth.set_request_type(HttpRequestMethod::GET);
-                auth.set_payload_hash(&payload_hash);
-                auth.set_date(scope_date);
-                auth.set_service(Service::S3);
-                auth.set_access_key_id(ACCESS_KEY_ID);
-                auth.set_secret_access_key(SECRET_ACCESS_KEY);
-                auth.set_region(Region::UsEast1);
-                auth.add_header("HOST", HOST);
-                auth.add_header("x-amz-content-sha256", &payload_hash);
-                auth.add_header("x-amz-date", SCOPE_DATE);
-                auth.add_header("Range", "bytes=0-9");
-
-                match auth.auth_header() {
-                    Ok(ah) => assert!(ah == AWS_TEST_1),
-                    Err(e) => {
-                        writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
-                        assert!(false);
-                    }
-                }
-            }
-            Err(e) => {
-                writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
-                assert!(false);
-            }
-        }
-    }
-
-    #[test]
-    fn test_put_object() {
-        match AWSAuth::new("https://examplebucket.s3.amazonaws.com/test$file.text") {
-            Ok(mut auth) => {
-                let payload_hash = match hashed_data(Some(b"Welcome to Amazon S3.")) {
-                    Ok(ph) => ph,
-                    Err(e) => {
-                        writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
-                        "".to_owned()
-                    }
-                };
-                let scope_date = UTC.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT)
-                                    .expect("Unable to parse date!");
-                auth.set_request_type(HttpRequestMethod::PUT);
-                auth.set_payload_hash(&payload_hash);
-                auth.set_date(scope_date);
-                auth.set_service(Service::S3);
-                auth.set_access_key_id(ACCESS_KEY_ID);
-                auth.set_secret_access_key(SECRET_ACCESS_KEY);
-                auth.set_region(Region::UsEast1);
-                auth.add_header("HOST", HOST);
-                auth.add_header("date", "Fri, 24 May 2013 00:00:00 GMT");
-                auth.add_header("x-amz-content-sha256", &payload_hash);
-                auth.add_header("x-amz-storage-class", "REDUCED_REDUNDANCY");
-                auth.add_header("x-amz-date", SCOPE_DATE);
-
-                match auth.auth_header() {
-                    Ok(ah) => assert!(ah == AWS_TEST_2),
-                    Err(e) => {
-                        writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
-                        assert!(false);
-                    }
-                }
-            }
-            Err(e) => {
-                writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
-                assert!(false);
-            }
-        }
-    }
-
-    #[test]
-    fn test_get_bucket_lifecycle() {
-        match AWSAuth::new("https://examplebucket.s3.amazonaws.com/?lifecycle") {
-            Ok(mut auth) => {
-                let payload_hash = match hashed_data(None) {
-                    Ok(ph) => ph,
-                    Err(e) => {
-                        writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
-                        "".to_owned()
-                    }
-                };
-                let scope_date = UTC.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT)
-                                    .expect("Unable to parse date!");
-                auth.set_request_type(HttpRequestMethod::GET);
-                auth.set_payload_hash(&payload_hash);
-                auth.set_date(scope_date);
-                auth.set_service(Service::S3);
-                auth.set_access_key_id(ACCESS_KEY_ID);
-                auth.set_secret_access_key(SECRET_ACCESS_KEY);
-                auth.set_region(Region::UsEast1);
-                auth.add_header("HOST", HOST);
-                auth.add_header("x-amz-content-sha256", &payload_hash);
-                auth.add_header("x-amz-date", SCOPE_DATE);
-
-                match auth.auth_header() {
-                    Ok(ah) => assert!(ah == AWS_TEST_3),
-                    Err(e) => {
-                        writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
-                        assert!(false);
-                    }
-                }
-            }
-            Err(e) => {
-                writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
-                assert!(false);
-            }
-        }
-    }
-
-    #[test]
-    fn test_get_bucket_list_objects() {
-        match AWSAuth::new("https://examplebucket.s3.amazonaws.com?max-keys=2&prefix=J") {
-            Ok(mut auth) => {
-                let payload_hash = match hashed_data(None) {
-                    Ok(ph) => ph,
-                    Err(e) => {
-                        writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
-                        "".to_owned()
-                    }
-                };
-                let scope_date = UTC.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT)
-                                    .expect("Unable to parse date!");
-                auth.set_request_type(HttpRequestMethod::GET);
-                auth.set_payload_hash(&payload_hash);
-                auth.set_date(scope_date);
-                auth.set_service(Service::S3);
-                auth.set_access_key_id(ACCESS_KEY_ID);
-                auth.set_secret_access_key(SECRET_ACCESS_KEY);
-                auth.set_region(Region::UsEast1);
-                auth.add_header("HOST", HOST);
-                auth.add_header("x-amz-content-sha256", &payload_hash);
-                auth.add_header("x-amz-date", SCOPE_DATE);
-
-                match auth.auth_header() {
-                    Ok(ah) => assert!(ah == AWS_TEST_4),
-                    Err(e) => {
-                        writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
-                        assert!(false);
-                    }
-                }
-            }
-            Err(e) => {
-                writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
-                assert!(false);
-            }
-        }
-    }
-
-    #[test]
-    #[cfg_attr(feature = "clippy", allow(cyclomatic_complexity))]
-    fn test_put_object_chunked() {
-        match AWSAuth::new("https://s3.amazonaws.com/examplebucket/chunkObject.txt") {
-            Ok(mut auth) => {
-                let scope_date = UTC.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT)
-                                    .expect("Unable to parse date!");
-                auth.set_mode(Mode::Chunked);
-                auth.set_request_type(HttpRequestMethod::PUT);
-                auth.set_date(scope_date);
-                auth.set_service(Service::S3);
-                auth.set_access_key_id(ACCESS_KEY_ID);
-                auth.set_secret_access_key(SECRET_ACCESS_KEY);
-                auth.set_region(Region::UsEast1);
-                auth.set_chunk_size(65536);
-                auth.add_header("HOST", "s3.amazonaws.com");
-                auth.add_header("Content-Encoding", "aws-chunked");
-                auth.add_header("x-amz-content-sha256", "STREAMING-AWS4-HMAC-SHA256-PAYLOAD");
-                auth.add_header("x-amz-storage-class", "REDUCED_REDUNDANCY");
-                auth.add_header("x-amz-date", SCOPE_DATE);
-                auth.add_header("x-amz-decoded-content-length", "66560");
-                auth.add_header("Content-Length", "66824");
-
-                match auth.auth_header() {
-                    Ok(ah) => assert!(ah == AWS_TEST_5),
-                    Err(e) => {
-                        writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
-                        assert!(false);
-                    }
-                }
-
-                let mut seed_sig = String::new();
-                match auth.seed_signature() {
-                    Ok(ss) => {
-                        assert!(ss == SEED_SIG);
-                        seed_sig = ss;
-                    }
-                    Err(e) => {
-                        writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
-                        assert!(false);
-                    }
-                }
-
-                let many_a: Vec<u8> = vec![97; 65536];
-                let mut chunk_sig_1 = String::new();
-                match auth.chunk_signature(&seed_sig, &many_a) {
-                    Ok(sig) => {
-                        assert!(sig == CHUNK_SIG_1);
-                        match auth.chunk_body(&sig, &many_a) {
-                            Ok(b) => assert!(b.len() == 65626),
-                            Err(e) => {
-                                writeln!(io::stderr(), "{}", e)
-                                    .expect("Unable to write to stderr!");
-                                assert!(false);
-                            }
-                        }
-                        chunk_sig_1 = sig;
-                    }
-                    Err(e) => {
-                        writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
-                        assert!(false);
-                    }
-                }
-
-                let less_a = vec![97; 1024];
-                let mut chunk_sig_2 = String::new();
-                match auth.chunk_signature(&chunk_sig_1, &less_a) {
-                    Ok(sig) => {
-                        assert!(sig == CHUNK_SIG_2);
-                        match auth.chunk_body(&sig, &less_a) {
-                            Ok(b) => assert!(b.len() == 1112),
-                            Err(e) => {
-                                writeln!(io::stderr(), "{}", e)
-                                    .expect("Unable to write to stderr!");
-                                assert!(false);
-                            }
-                        }
-                        chunk_sig_2 = sig;
-                    }
-                    Err(e) => {
-                        writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
-                        assert!(false);
-                    }
-                }
-
-                match auth.chunk_signature(&chunk_sig_2, &[]) {
-                    Ok(sig) => {
-                        assert!(sig == CHUNK_SIG_3);
-                        match auth.chunk_body(&sig, &[]) {
-                            Ok(b) => assert!(b.len() == 86),
-                            Err(e) => {
-                                writeln!(io::stderr(), "{}", e)
-                                    .expect("Unable to write to stderr!");
-                                assert!(false);
-                            }
-                        }
-                    }
-                    Err(e) => {
-                        writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
-                        assert!(false);
-                    }
-                }
-            }
-            Err(e) => {
-                writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
-                assert!(false);
-            }
-        }
     }
 }
