@@ -46,12 +46,14 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-457' class='srclink' href='../src/warheadhateus/lib.rs.html#442-445' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-508' class='srclink' href='../src/warheadhateus/lib.rs.html#786-791' title='goto source code'>[src]</a></span></h1>
 <pre class='rust enum'>pub enum SAM {
     AWS4HMACSHA256,
+    AWS4HMACSHA256PAYLOAD,
 }</pre><div class='docblock'><p>Singing Algorithm Moniker</p>
 </div><h2 class='variants'>Variants</h2>
 <table><tr><td id='variant.AWS4HMACSHA256'><code>AWS4HMACSHA256</code></td><td><div class='docblock'><p>AWS Signature Version 4, HMAC-SHA256</p>
+</div></td></tr><tr><td id='variant.AWS4HMACSHA256PAYLOAD'><code>AWS4HMACSHA256PAYLOAD</code></td><td><div class='docblock'><p>AWS Signature Version 4, HMAC-SHA256 Payload (used for chunked mode).</p>
 </div></td></tr></table><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/default/trait.Default.html' title='core::default::Default'>Default</a> for <a class='enum' href='../warheadhateus/enum.SAM.html' title='warheadhateus::SAM'>SAM</a></code></h3><div class='impl-items'><h4 id='method.default' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/default/trait.Default.html#method.default' class='fnname'>default</a>() -&gt; <a class='enum' href='../warheadhateus/enum.SAM.html' title='warheadhateus::SAM'>SAM</a></code></h4>
 </div><h3 class='impl'><code>impl&lt;'a&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.Into.html' title='core::convert::Into'>Into</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt; for &amp;'a <a class='enum' href='../warheadhateus/enum.SAM.html' title='warheadhateus::SAM'>SAM</a></code></h3><div class='impl-items'><h4 id='method.into' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/convert/trait.Into.html#method.into' class='fnname'>into</a>(self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a></code></h4>
 </div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html' title='core::fmt::Display'>Display</a> for <a class='enum' href='../warheadhateus/enum.SAM.html' title='warheadhateus::SAM'>SAM</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html#method.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>

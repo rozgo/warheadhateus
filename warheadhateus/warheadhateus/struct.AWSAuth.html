@@ -46,43 +46,315 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-252' class='srclink' href='../src/warheadhateus/lib.rs.html#146-160' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-262' class='srclink' href='../src/warheadhateus/lib.rs.html#123-137' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct AWSAuth {
     // some fields omitted
 }</pre><div class='docblock'><p>Amazon Web Service Authorization Header struct</p>
-</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../warheadhateus/struct.AWSAuth.html' title='warheadhateus::AWSAuth'>AWSAuth</a></code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>(url: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../warheadhateus/struct.AWSAuth.html' title='warheadhateus::AWSAuth'>AWSAuth</a>, AWSAuthError&gt;</code></h4>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../warheadhateus/struct.AWSAuth.html' title='warheadhateus::AWSAuth'>AWSAuth</a></code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>(url: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../warheadhateus/struct.AWSAuth.html' title='warheadhateus::AWSAuth'>AWSAuth</a>, <a class='enum' href='../warheadhateus/enum.AWSAuthError.html' title='warheadhateus::AWSAuthError'>AWSAuthError</a>&gt;</code></h4>
 <div class='docblock'><p>Create a new AWSAuth struct.</p>
+
+<h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>warheadhateus</span>::<span class='ident'>AWSAuth</span>;
+
+<span class='kw'>match</span> <span class='ident'>AWSAuth</span>::<span class='ident'>new</span>(<span class='string'>&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;</span>) {
+    <span class='prelude-val'>Ok</span>(<span class='ident'>auth</span>) <span class='op'>=&gt;</span> {
+        <span class='comment'>// Do fun stuff with the auth struct</span>
+    }
+    <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
+        <span class='comment'>// Failure</span>
+    }
+}</pre>
 </div><h4 id='method.add_header' class='method'><code>fn <a href='#method.add_header' class='fnname'>add_header</a>(&amp;mut self, key: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, val: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; &amp;mut <a class='struct' href='../warheadhateus/struct.AWSAuth.html' title='warheadhateus::AWSAuth'>AWSAuth</a></code></h4>
-<div class='docblock'><p>Add a header field to the AWSAuth struct.</p>
+<div class='docblock'><p>Add a header key/value pair.</p>
+
+<h1 id='examples-1' class='section-header'><a href='#examples-1'>Examples</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>warheadhateus</span>::<span class='ident'>AWSAuth</span>;
+
+<span class='kw'>match</span> <span class='ident'>AWSAuth</span>::<span class='ident'>new</span>(<span class='string'>&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;</span>) {
+    <span class='prelude-val'>Ok</span>(<span class='kw-2'>mut</span> <span class='ident'>auth</span>) <span class='op'>=&gt;</span> {
+        <span class='ident'>auth</span>.<span class='ident'>add_header</span>(<span class='string'>&quot;Host&quot;</span>, <span class='string'>&quot;s3.amazonaws.com&quot;</span>);
+    }
+    <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
+        <span class='comment'>// Failure</span>
+    }
+}</pre>
 </div><h4 id='method.set_access_key_id' class='method'><code>fn <a href='#method.set_access_key_id' class='fnname'>set_access_key_id</a>(&amp;mut self, access_key_id: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; &amp;mut <a class='struct' href='../warheadhateus/struct.AWSAuth.html' title='warheadhateus::AWSAuth'>AWSAuth</a></code></h4>
 <div class='docblock'><p>Set the AWS Access Key ID (this is supplied by Amazon).</p>
-</div><h4 id='method.set_chunk_size' class='method'><code>fn <a href='#method.set_chunk_size' class='fnname'>set_chunk_size</a>(&amp;mut self, chunk_size: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a>) -&gt; &amp;mut <a class='struct' href='../warheadhateus/struct.AWSAuth.html' title='warheadhateus::AWSAuth'>AWSAuth</a></code></h4>
-<div class='docblock'><p>Set the chunk size.
-* Note this is only used when Mode::Chunk is selected.
-* Chunk size must be at least 8 KB. We recommend a chunk size of a least 64 KB for better
-performance. This chunk size applies to all chunk except the last one. The last chunk you
-send can be smaller than 8 KB. If your payload is small and can fit in one chunk, then it
-can be smaller than the 8 KB.</p>
+
+<h1 id='examples-2' class='section-header'><a href='#examples-2'>Examples</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>warheadhateus</span>::<span class='ident'>AWSAuth</span>;
+
+<span class='kw'>match</span> <span class='ident'>AWSAuth</span>::<span class='ident'>new</span>(<span class='string'>&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;</span>) {
+    <span class='prelude-val'>Ok</span>(<span class='kw-2'>mut</span> <span class='ident'>auth</span>) <span class='op'>=&gt;</span> {
+        <span class='ident'>auth</span>.<span class='ident'>set_access_key_id</span>(<span class='string'>&quot;AKIAIOSFODNN7EXAMPLE&quot;</span>);
+    }
+    <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
+        <span class='comment'>// Failure</span>
+    }
+}</pre>
+</div><h4 id='method.set_chunk_size' class='method'><code>fn <a href='#method.set_chunk_size' class='fnname'>set_chunk_size</a>(&amp;mut self, chunk_size: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; &amp;mut <a class='struct' href='../warheadhateus/struct.AWSAuth.html' title='warheadhateus::AWSAuth'>AWSAuth</a></code></h4>
+<div class='docblock'><p>Set the chunk size.</p>
+
+<ul>
+<li>Note this is only used when <code>Mode::Chunked</code> is selected.</li>
+<li>Chunk size must be at least 8 KB. We recommend a chunk size of a least 64 KB for better
+performance. This chunk size applies to all CHUNK_SIG_3 except the last one. The last chunk
+you send can be smaller than 8 KB. If your payload is small and can fit in one chunk, then
+it can be smaller than the 8 KB.</li>
+</ul>
+
+<h1 id='examples-3' class='section-header'><a href='#examples-3'>Examples</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>warheadhateus</span>::{<span class='ident'>AWSAuth</span>, <span class='ident'>Mode</span>};
+
+<span class='kw'>match</span> <span class='ident'>AWSAuth</span>::<span class='ident'>new</span>(<span class='string'>&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;</span>) {
+    <span class='prelude-val'>Ok</span>(<span class='kw-2'>mut</span> <span class='ident'>auth</span>) <span class='op'>=&gt;</span> {
+        <span class='ident'>auth</span>.<span class='ident'>set_mode</span>(<span class='ident'>Mode</span>::<span class='ident'>Chunked</span>);
+        <span class='ident'>auth</span>.<span class='ident'>set_chunk_size</span>(<span class='number'>65536</span>);
+    }
+    <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
+        <span class='comment'>// Failure</span>
+    }
+}</pre>
 </div><h4 id='method.set_date' class='method'><code>fn <a href='#method.set_date' class='fnname'>set_date</a>(&amp;mut self, date: <a class='struct' href='../chrono/datetime/struct.DateTime.html' title='chrono::datetime::DateTime'>DateTime</a>&lt;<a class='struct' href='../chrono/offset/utc/struct.UTC.html' title='chrono::offset::utc::UTC'>UTC</a>&gt;) -&gt; &amp;mut <a class='struct' href='../warheadhateus/struct.AWSAuth.html' title='warheadhateus::AWSAuth'>AWSAuth</a></code></h4>
-<div class='docblock'><p>Set the scope date for the auth request.  Request are valid for 7 days from the given date.
-* Note that this date doesn&#39;t have to match the <em>x-amz-date</em> or <em>date</em> header values.</p>
+<div class='docblock'><p>Set the scope date for the auth request.</p>
+
+<ul>
+<li>Note that this date doesn&#39;t have to match the <em>x-amz-date</em> or <em>date</em> header values.</li>
+<li>Requests are valid for 7 days from the given scope date.</li>
+</ul>
+
+<h1 id='examples-4' class='section-header'><a href='#examples-4'>Examples</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>chrono</span>::<span class='ident'>UTC</span>;
+<span class='kw'>use</span> <span class='ident'>warheadhateus</span>::<span class='ident'>AWSAuth</span>;
+
+<span class='kw'>match</span> <span class='ident'>AWSAuth</span>::<span class='ident'>new</span>(<span class='string'>&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;</span>) {
+    <span class='prelude-val'>Ok</span>(<span class='kw-2'>mut</span> <span class='ident'>auth</span>) <span class='op'>=&gt;</span> {
+        <span class='ident'>auth</span>.<span class='ident'>set_date</span>(<span class='ident'>UTC</span>::<span class='ident'>now</span>());
+    }
+    <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
+        <span class='comment'>// Failure</span>
+    }
+}</pre>
 </div><h4 id='method.set_mode' class='method'><code>fn <a href='#method.set_mode' class='fnname'>set_mode</a>(&amp;mut self, mode: <a class='enum' href='../warheadhateus/enum.Mode.html' title='warheadhateus::Mode'>Mode</a>) -&gt; &amp;mut <a class='struct' href='../warheadhateus/struct.AWSAuth.html' title='warheadhateus::AWSAuth'>AWSAuth</a></code></h4>
 <div class='docblock'><p>Set the mode of operation.</p>
+
+<h1 id='examples-5' class='section-header'><a href='#examples-5'>Examples</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>warheadhateus</span>::{<span class='ident'>AWSAuth</span>, <span class='ident'>Mode</span>};
+
+<span class='kw'>match</span> <span class='ident'>AWSAuth</span>::<span class='ident'>new</span>(<span class='string'>&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;</span>) {
+    <span class='prelude-val'>Ok</span>(<span class='kw-2'>mut</span> <span class='ident'>auth</span>) <span class='op'>=&gt;</span> {
+        <span class='ident'>auth</span>.<span class='ident'>set_mode</span>(<span class='ident'>Mode</span>::<span class='ident'>Chunked</span>);
+    }
+    <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
+        <span class='comment'>// Failure</span>
+    }
+}</pre>
 </div><h4 id='method.set_payload_hash' class='method'><code>fn <a href='#method.set_payload_hash' class='fnname'>set_payload_hash</a>(&amp;mut self, payload_hash: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; &amp;mut <a class='struct' href='../warheadhateus/struct.AWSAuth.html' title='warheadhateus::AWSAuth'>AWSAuth</a></code></h4>
-<div class='docblock'><p>Set the payload hash.  This should be the hash of any request payload, or the hash of the
-empty string (&quot;&quot;) if there is no payload.</p>
+<div class='docblock'><p>Set the payload hash.</p>
+
+<p>This should be the SHA-256 hash of any request payload, or the hash
+of the empty string (&quot;&quot;) if there is no payload.  There is a <code>hashed_data</code> function in
+this library that will do this for you, but you are free to use any SHA-256 implementation.</p>
+
+<h1 id='examples-6' class='section-header'><a href='#examples-6'>Examples</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>warheadhateus</span>::{<span class='ident'>AWSAuth</span>, <span class='ident'>hashed_data</span>};
+
+<span class='kw'>match</span> <span class='ident'>AWSAuth</span>::<span class='ident'>new</span>(<span class='string'>&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;</span>) {
+    <span class='prelude-val'>Ok</span>(<span class='kw-2'>mut</span> <span class='ident'>auth</span>) <span class='op'>=&gt;</span> {
+        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Ok</span>(<span class='ident'>hd</span>) <span class='op'>=</span> <span class='ident'>hashed_data</span>(<span class='prelude-val'>Some</span>(<span class='string'>b&quot;This is a test&quot;</span>)) {
+            <span class='ident'>auth</span>.<span class='ident'>set_payload_hash</span>(<span class='kw-2'>&amp;</span><span class='ident'>hd</span>);
+        }
+    }
+    <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
+        <span class='comment'>// Failure</span>
+    }
+}</pre>
 </div><h4 id='method.set_region' class='method'><code>fn <a href='#method.set_region' class='fnname'>set_region</a>(&amp;mut self, region: <a class='enum' href='../warheadhateus/enum.Region.html' title='warheadhateus::Region'>Region</a>) -&gt; &amp;mut <a class='struct' href='../warheadhateus/struct.AWSAuth.html' title='warheadhateus::AWSAuth'>AWSAuth</a></code></h4>
 <div class='docblock'><p>Set the region the request is scoped for.</p>
+
+<h1 id='examples-7' class='section-header'><a href='#examples-7'>Examples</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>warheadhateus</span>::{<span class='ident'>AWSAuth</span>, <span class='ident'>Region</span>};
+
+<span class='kw'>match</span> <span class='ident'>AWSAuth</span>::<span class='ident'>new</span>(<span class='string'>&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;</span>) {
+    <span class='prelude-val'>Ok</span>(<span class='kw-2'>mut</span> <span class='ident'>auth</span>) <span class='op'>=&gt;</span> {
+        <span class='ident'>auth</span>.<span class='ident'>set_region</span>(<span class='ident'>Region</span>::<span class='ident'>UsWest1</span>);
+    }
+    <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
+        <span class='comment'>// Failure</span>
+    }
+}</pre>
 </div><h4 id='method.set_request_type' class='method'><code>fn <a href='#method.set_request_type' class='fnname'>set_request_type</a>(&amp;mut self, verb: <a class='enum' href='../warheadhateus/enum.HttpRequestMethod.html' title='warheadhateus::HttpRequestMethod'>HttpRequestMethod</a>) -&gt; &amp;mut <a class='struct' href='../warheadhateus/struct.AWSAuth.html' title='warheadhateus::AWSAuth'>AWSAuth</a></code></h4>
 <div class='docblock'><p>Set the request verb (i.e. GET, PUT, POST, DELETE)</p>
+
+<h1 id='examples-8' class='section-header'><a href='#examples-8'>Examples</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>warheadhateus</span>::{<span class='ident'>AWSAuth</span>, <span class='ident'>HttpRequestMethod</span>};
+
+<span class='kw'>match</span> <span class='ident'>AWSAuth</span>::<span class='ident'>new</span>(<span class='string'>&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;</span>) {
+    <span class='prelude-val'>Ok</span>(<span class='kw-2'>mut</span> <span class='ident'>auth</span>) <span class='op'>=&gt;</span> {
+        <span class='ident'>auth</span>.<span class='ident'>set_request_type</span>(<span class='ident'>HttpRequestMethod</span>::<span class='ident'>PUT</span>);
+    }
+    <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
+        <span class='comment'>// Failure</span>
+    }
+}</pre>
 </div><h4 id='method.set_secret_access_key' class='method'><code>fn <a href='#method.set_secret_access_key' class='fnname'>set_secret_access_key</a>(&amp;mut self, secret_access_key: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; &amp;mut <a class='struct' href='../warheadhateus/struct.AWSAuth.html' title='warheadhateus::AWSAuth'>AWSAuth</a></code></h4>
 <div class='docblock'><p>Set the AWS Secret Access Key (this is supplied by Amazon).</p>
+
+<h1 id='examples-9' class='section-header'><a href='#examples-9'>Examples</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>warheadhateus</span>::<span class='ident'>AWSAuth</span>;
+
+<span class='kw'>match</span> <span class='ident'>AWSAuth</span>::<span class='ident'>new</span>(<span class='string'>&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;</span>) {
+    <span class='prelude-val'>Ok</span>(<span class='kw-2'>mut</span> <span class='ident'>auth</span>) <span class='op'>=&gt;</span> {
+        <span class='ident'>auth</span>.<span class='ident'>set_secret_access_key</span>(<span class='string'>&quot;wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY&quot;</span>);
+    }
+    <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
+        <span class='comment'>// Failure</span>
+    }
+}</pre>
+</div><h4 id='method.set_sam' class='method'><code>fn <a href='#method.set_sam' class='fnname'>set_sam</a>(&amp;mut self, sam: <a class='enum' href='../warheadhateus/enum.SAM.html' title='warheadhateus::SAM'>SAM</a>) -&gt; &amp;mut <a class='struct' href='../warheadhateus/struct.AWSAuth.html' title='warheadhateus::AWSAuth'>AWSAuth</a></code></h4>
+<div class='docblock'><p>Set the Signing Algorithm Moniker (SAM).</p>
+
+<ul>
+<li>Note that the default is usually acceptable here, only chunked requests need to change it.</li>
+</ul>
+
+<h1 id='examples-10' class='section-header'><a href='#examples-10'>Examples</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>warheadhateus</span>::{<span class='ident'>AWSAuth</span>, <span class='ident'>SAM</span>};
+
+<span class='kw'>match</span> <span class='ident'>AWSAuth</span>::<span class='ident'>new</span>(<span class='string'>&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;</span>) {
+    <span class='prelude-val'>Ok</span>(<span class='kw-2'>mut</span> <span class='ident'>auth</span>) <span class='op'>=&gt;</span> {
+        <span class='ident'>auth</span>.<span class='ident'>set_sam</span>(<span class='ident'>SAM</span>::<span class='ident'>AWS4HMACSHA256PAYLOAD</span>);
+    }
+    <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
+        <span class='comment'>// Failure</span>
+    }
+}</pre>
 </div><h4 id='method.set_service' class='method'><code>fn <a href='#method.set_service' class='fnname'>set_service</a>(&amp;mut self, service: <a class='enum' href='../warheadhateus/enum.Service.html' title='warheadhateus::Service'>Service</a>) -&gt; &amp;mut <a class='struct' href='../warheadhateus/struct.AWSAuth.html' title='warheadhateus::AWSAuth'>AWSAuth</a></code></h4>
-<div class='docblock'><p>Set the AWS services this request should be constructed for (i.e. s3)</p>
+<div class='docblock'><p>Set the AWS services this request should be constructed for (i.e. S3)</p>
+
+<h1 id='examples-11' class='section-header'><a href='#examples-11'>Examples</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>warheadhateus</span>::{<span class='ident'>AWSAuth</span>, <span class='ident'>Service</span>};
+
+<span class='kw'>match</span> <span class='ident'>AWSAuth</span>::<span class='ident'>new</span>(<span class='string'>&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;</span>) {
+    <span class='prelude-val'>Ok</span>(<span class='kw-2'>mut</span> <span class='ident'>auth</span>) <span class='op'>=&gt;</span> {
+        <span class='ident'>auth</span>.<span class='ident'>set_service</span>(<span class='ident'>Service</span>::<span class='ident'>S3</span>);
+    }
+    <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
+        <span class='comment'>// Failure</span>
+    }
+}</pre>
 </div><h4 id='method.auth_header' class='method'><code>fn <a href='#method.auth_header' class='fnname'>auth_header</a>(&amp;self) -&gt; <a class='type' href='../warheadhateus/type.AWSAuthResult.html' title='warheadhateus::AWSAuthResult'>AWSAuthResult</a></code></h4>
 <div class='docblock'><p>Create the AWS S3 Authorization HTTP header.</p>
-</div><h4 id='method.content_length' class='method'><code>fn <a href='#method.content_length' class='fnname'>content_length</a>(&amp;self, payload_size: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, AWSAuthError&gt;</code></h4>
+
+<h1 id='examples-12' class='section-header'><a href='#examples-12'>Examples</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='self'>self</span>, <span class='ident'>Write</span>};
+<span class='kw'>use</span> <span class='ident'>warheadhateus</span>::<span class='ident'>AWSAuth</span>;
+
+<span class='kw'>match</span> <span class='ident'>AWSAuth</span>::<span class='ident'>new</span>(<span class='string'>&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;</span>) {
+    <span class='prelude-val'>Ok</span>(<span class='kw-2'>mut</span> <span class='ident'>auth</span>) <span class='op'>=&gt;</span> {
+        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Ok</span>(<span class='ident'>ah</span>) <span class='op'>=</span> <span class='ident'>auth</span>.<span class='ident'>auth_header</span>() {
+            <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>io</span>::<span class='ident'>stdout</span>(), <span class='string'>&quot;{}&quot;</span>, <span class='ident'>ah</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unable to write to stdout!&quot;</span>);
+        }
+    }
+    <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
+        <span class='comment'>// Failure</span>
+    }
+}</pre>
+</div><h4 id='method.seed_signature' class='method'><code>fn <a href='#method.seed_signature' class='fnname'>seed_signature</a>(&amp;self) -&gt; <a class='type' href='../warheadhateus/type.AWSAuthResult.html' title='warheadhateus::AWSAuthResult'>AWSAuthResult</a></code></h4>
+<div class='docblock'><p>Generate the seed signature for chunked mode.</p>
+
+<h1 id='examples-13' class='section-header'><a href='#examples-13'>Examples</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='self'>self</span>, <span class='ident'>Write</span>};
+<span class='kw'>use</span> <span class='ident'>warheadhateus</span>::{<span class='ident'>AWSAuth</span>, <span class='ident'>Mode</span>};
+
+<span class='kw'>match</span> <span class='ident'>AWSAuth</span>::<span class='ident'>new</span>(<span class='string'>&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;</span>) {
+    <span class='prelude-val'>Ok</span>(<span class='kw-2'>mut</span> <span class='ident'>auth</span>) <span class='op'>=&gt;</span> {
+        <span class='ident'>auth</span>.<span class='ident'>set_mode</span>(<span class='ident'>Mode</span>::<span class='ident'>Chunked</span>);
+        <span class='ident'>auth</span>.<span class='ident'>set_chunk_size</span>(<span class='number'>65536</span>);
+        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Ok</span>(<span class='ident'>ss</span>) <span class='op'>=</span> <span class='ident'>auth</span>.<span class='ident'>seed_signature</span>() {
+            <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>io</span>::<span class='ident'>stdout</span>(), <span class='string'>&quot;{}&quot;</span>, <span class='ident'>ss</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unable to write to stdout!&quot;</span>);
+        }
+    }
+    <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
+        <span class='comment'>// Failure</span>
+    }
+}</pre>
+</div><h4 id='method.chunk_signature' class='method'><code>fn <a href='#method.chunk_signature' class='fnname'>chunk_signature</a>(&amp;self, previous_signature: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, chunk: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='type' href='../warheadhateus/type.AWSAuthResult.html' title='warheadhateus::AWSAuthResult'>AWSAuthResult</a></code></h4>
+<div class='docblock'><p>Generate the chunk signature for a given chunk.</p>
+
+<h1 id='examples-14' class='section-header'><a href='#examples-14'>Examples</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='self'>self</span>, <span class='ident'>Write</span>};
+<span class='kw'>use</span> <span class='ident'>warheadhateus</span>::{<span class='ident'>AWSAuth</span>, <span class='ident'>Mode</span>};
+
+<span class='kw'>match</span> <span class='ident'>AWSAuth</span>::<span class='ident'>new</span>(<span class='string'>&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;</span>) {
+    <span class='prelude-val'>Ok</span>(<span class='kw-2'>mut</span> <span class='ident'>auth</span>) <span class='op'>=&gt;</span> {
+        <span class='ident'>auth</span>.<span class='ident'>set_mode</span>(<span class='ident'>Mode</span>::<span class='ident'>Chunked</span>);
+        <span class='ident'>auth</span>.<span class='ident'>set_chunk_size</span>(<span class='number'>65536</span>);
+        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Ok</span>(<span class='ident'>ss</span>) <span class='op'>=</span> <span class='ident'>auth</span>.<span class='ident'>seed_signature</span>() {
+            <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Ok</span>(<span class='ident'>cs</span>) <span class='op'>=</span> <span class='ident'>auth</span>.<span class='ident'>chunk_signature</span>(<span class='kw-2'>&amp;</span><span class='ident'>ss</span>, <span class='kw-2'>&amp;</span>[<span class='number'>0</span>; <span class='number'>100</span>]) {
+                <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>io</span>::<span class='ident'>stdout</span>(), <span class='string'>&quot;{}&quot;</span>, <span class='ident'>cs</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unable to write to stdout!&quot;</span>);
+            }
+        }
+    }
+    <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
+        <span class='comment'>// Failure</span>
+    }
+}</pre>
+</div><h4 id='method.chunk_body' class='method'><code>fn <a href='#method.chunk_body' class='fnname'>chunk_body</a>(&amp;self, chunk_signature: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, chunk: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;, <a class='enum' href='../warheadhateus/enum.AWSAuthError.html' title='warheadhateus::AWSAuthError'>AWSAuthError</a>&gt;</code></h4>
+<div class='docblock'><p>Generate the chunk body for a given chunk.</p>
+
+<h1 id='examples-15' class='section-header'><a href='#examples-15'>Examples</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='self'>self</span>, <span class='ident'>Write</span>};
+<span class='kw'>use</span> <span class='ident'>warheadhateus</span>::{<span class='ident'>AWSAuth</span>, <span class='ident'>Mode</span>};
+
+<span class='kw'>match</span> <span class='ident'>AWSAuth</span>::<span class='ident'>new</span>(<span class='string'>&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;</span>) {
+    <span class='prelude-val'>Ok</span>(<span class='kw-2'>mut</span> <span class='ident'>auth</span>) <span class='op'>=&gt;</span> {
+        <span class='ident'>auth</span>.<span class='ident'>set_mode</span>(<span class='ident'>Mode</span>::<span class='ident'>Chunked</span>);
+        <span class='ident'>auth</span>.<span class='ident'>set_chunk_size</span>(<span class='number'>65536</span>);
+        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Ok</span>(<span class='ident'>ss</span>) <span class='op'>=</span> <span class='ident'>auth</span>.<span class='ident'>seed_signature</span>() {
+            <span class='kw'>let</span> <span class='ident'>chunk</span> <span class='op'>=</span> [<span class='number'>0</span>; <span class='number'>100</span>];
+            <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Ok</span>(<span class='ident'>cs</span>) <span class='op'>=</span> <span class='ident'>auth</span>.<span class='ident'>chunk_signature</span>(<span class='kw-2'>&amp;</span><span class='ident'>ss</span>, <span class='kw-2'>&amp;</span><span class='ident'>chunk</span>) {
+                <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Ok</span>(<span class='ident'>cb</span>) <span class='op'>=</span> <span class='ident'>auth</span>.<span class='ident'>chunk_body</span>(<span class='kw-2'>&amp;</span><span class='ident'>cs</span>, <span class='kw-2'>&amp;</span><span class='ident'>chunk</span>) {
+                    <span class='kw'>let</span> <span class='ident'>l</span> <span class='op'>=</span> <span class='ident'>cb</span>.<span class='ident'>len</span>();
+                    <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>io</span>::<span class='ident'>stdout</span>(), <span class='string'>&quot;{}&quot;</span>, <span class='ident'>l</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unable to write to stdout!&quot;</span>);
+                }
+            }
+        }
+    }
+    <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
+        <span class='comment'>// Failure</span>
+    }
+}</pre>
+</div><h4 id='method.content_length' class='method'><code>fn <a href='#method.content_length' class='fnname'>content_length</a>(&amp;self, payload_size: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, <a class='enum' href='../warheadhateus/enum.AWSAuthError.html' title='warheadhateus::AWSAuthError'>AWSAuthError</a>&gt;</code></h4>
 <div class='docblock'><p>Generate the value for the &#39;Content-Length&#39; header when using chunked mode.</p>
+
+<p>This function can be used for the following requirement from Amazon for pre-computing the
+<code>Content-Length</code> header.</p>
+
+<ul>
+<li>When transferring data in a series of chunks, you must use the <code>Content-Length</code> HTTP
+header to explicitly specify the total content length (object length in bytes plus metadata
+in each chunk). This will require you to pre-compute the total length of the payload
+including the metadata you will send in each chunk before starting your request. The
+<code>x-amz-decoded-content-length</code> header will contain the size of the object length in bytes.</li>
+</ul>
+
+<h1 id='examples-16' class='section-header'><a href='#examples-16'>Examples</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='self'>self</span>, <span class='ident'>Write</span>};
+<span class='kw'>use</span> <span class='ident'>warheadhateus</span>::{<span class='ident'>AWSAuth</span>, <span class='ident'>Mode</span>};
+
+<span class='kw'>match</span> <span class='ident'>AWSAuth</span>::<span class='ident'>new</span>(<span class='string'>&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;</span>) {
+    <span class='prelude-val'>Ok</span>(<span class='kw-2'>mut</span> <span class='ident'>auth</span>) <span class='op'>=&gt;</span> {
+        <span class='ident'>auth</span>.<span class='ident'>set_mode</span>(<span class='ident'>Mode</span>::<span class='ident'>Chunked</span>);
+        <span class='ident'>auth</span>.<span class='ident'>set_chunk_size</span>(<span class='number'>65536</span>);
+        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Ok</span>(<span class='ident'>cl</span>) <span class='op'>=</span> <span class='ident'>auth</span>.<span class='ident'>content_length</span>(<span class='number'>100000</span>) {
+            <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>io</span>::<span class='ident'>stdout</span>(), <span class='string'>&quot;{}&quot;</span>, <span class='ident'>cl</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unable to write to stdout!&quot;</span>);
+        }
+    }
+    <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> {
+        <span class='comment'>// Failure</span>
+    }
+}</pre>
 </div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/default/trait.Default.html' title='core::default::Default'>Default</a> for <a class='struct' href='../warheadhateus/struct.AWSAuth.html' title='warheadhateus::AWSAuth'>AWSAuth</a></code></h3><div class='impl-items'><h4 id='method.default' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/default/trait.Default.html#method.default' class='fnname'>default</a>() -&gt; <a class='struct' href='../warheadhateus/struct.AWSAuth.html' title='warheadhateus::AWSAuth'>AWSAuth</a></code></h4>
 </div></section>
     <section id='search' class="content hidden"></section>

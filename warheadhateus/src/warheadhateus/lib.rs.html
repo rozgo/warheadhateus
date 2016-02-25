@@ -811,6 +811,77 @@
 <span id="768">768</span>
 <span id="769">769</span>
 <span id="770">770</span>
+<span id="771">771</span>
+<span id="772">772</span>
+<span id="773">773</span>
+<span id="774">774</span>
+<span id="775">775</span>
+<span id="776">776</span>
+<span id="777">777</span>
+<span id="778">778</span>
+<span id="779">779</span>
+<span id="780">780</span>
+<span id="781">781</span>
+<span id="782">782</span>
+<span id="783">783</span>
+<span id="784">784</span>
+<span id="785">785</span>
+<span id="786">786</span>
+<span id="787">787</span>
+<span id="788">788</span>
+<span id="789">789</span>
+<span id="790">790</span>
+<span id="791">791</span>
+<span id="792">792</span>
+<span id="793">793</span>
+<span id="794">794</span>
+<span id="795">795</span>
+<span id="796">796</span>
+<span id="797">797</span>
+<span id="798">798</span>
+<span id="799">799</span>
+<span id="800">800</span>
+<span id="801">801</span>
+<span id="802">802</span>
+<span id="803">803</span>
+<span id="804">804</span>
+<span id="805">805</span>
+<span id="806">806</span>
+<span id="807">807</span>
+<span id="808">808</span>
+<span id="809">809</span>
+<span id="810">810</span>
+<span id="811">811</span>
+<span id="812">812</span>
+<span id="813">813</span>
+<span id="814">814</span>
+<span id="815">815</span>
+<span id="816">816</span>
+<span id="817">817</span>
+<span id="818">818</span>
+<span id="819">819</span>
+<span id="820">820</span>
+<span id="821">821</span>
+<span id="822">822</span>
+<span id="823">823</span>
+<span id="824">824</span>
+<span id="825">825</span>
+<span id="826">826</span>
+<span id="827">827</span>
+<span id="828">828</span>
+<span id="829">829</span>
+<span id="830">830</span>
+<span id="831">831</span>
+<span id="832">832</span>
+<span id="833">833</span>
+<span id="834">834</span>
+<span id="835">835</span>
+<span id="836">836</span>
+<span id="837">837</span>
+<span id="838">838</span>
+<span id="839">839</span>
+<span id="840">840</span>
+<span id="841">841</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright (c) 2016 warheadhateus developers</span>
 <span class='comment'>//</span>
@@ -822,94 +893,72 @@
 
 <span class='doccomment'>//! AWS Authorization Header Generation (AWS Signature Version 4)</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//!     // ##      ##    ###    ########  ##     ## ########    ###    ########</span>
-<span class='doccomment'>//!     // ##  ##  ##   ## ##   ##     ## ##     ## ##         ## ##   ##     ##</span>
-<span class='doccomment'>//!     // ##  ##  ##  ##   ##  ##     ## ##     ## ##        ##   ##  ##     ##</span>
-<span class='doccomment'>//!     // ##  ##  ## ##     ## ########  ######### ######   ##     ## ##     ##</span>
-<span class='doccomment'>//!     // ##  ##  ## ######### ##   ##   ##     ## ##       ######### ##     ##</span>
-<span class='doccomment'>//!     // ##  ##  ## ##     ## ##    ##  ##     ## ##       ##     ## ##     ##</span>
-<span class='doccomment'>//!     //  ###  ###  ##     ## ##     ## ##     ## ######## ##     ## ########</span>
+<span class='doccomment'>//! After setting up the AWSAuth struct, calling `auth_header` will return a String similar to the</span>
+<span class='doccomment'>//! following:</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//!     // ##     ##    ###    ######## ########</span>
-<span class='doccomment'>//!     // ##     ##   ## ##      ##    ##</span>
-<span class='doccomment'>//!     // ##     ##  ##   ##     ##    ##</span>
-<span class='doccomment'>//!     // ######### ##     ##    ##    ######</span>
-<span class='doccomment'>//!     // ##     ## #########    ##    ##</span>
-<span class='doccomment'>//!     // ##     ## ##     ##    ##    ##</span>
-<span class='doccomment'>//!     // ##     ## ##     ##    ##    ########</span>
+<span class='doccomment'>//! ```text</span>
+<span class='doccomment'>//! AWS4-HMAC-SHA256 Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request,\</span>
+<span class='doccomment'>//! SignedHeaders=host;range;x-amz-content-sha256;x-amz-date,\</span>
+<span class='doccomment'>//! Signature=f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd91039c6036bdb41</span>
+<span class='doccomment'>//! ```</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//!     // ##     ##  ######</span>
-<span class='doccomment'>//!     // ##     ## ##    ##</span>
-<span class='doccomment'>//!     // ##     ## ##</span>
-<span class='doccomment'>//!     // ##     ##  ######</span>
-<span class='doccomment'>//!     // ##     ##       ##</span>
-<span class='doccomment'>//!     // ##     ## ##    ##</span>
-<span class='doccomment'>//!     //  #######   ######</span>
+<span class='doccomment'>//! Currently this is implemented for S3 single and multi chunk mode and passes all tests.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! * [Single Chunk][1]</span>
+<span class='doccomment'>//! * [Multiple Chunks][2]</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! [1]: http://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html</span>
+<span class='doccomment'>//! [2]: http://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-streaming.html</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! # Examples</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! ## Amazon S3 Single Chunk Mode</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! ```</span>
 <span class='doccomment'>//! # #[macro_use] extern crate log;</span>
 <span class='doccomment'>//! # extern crate chrono;</span>
 <span class='doccomment'>//! # extern crate warheadhateus;</span>
-<span class='doccomment'>//!</span>
+<span class='doccomment'>//! #</span>
+<span class='doccomment'>//! # use chrono::UTC;</span>
+<span class='doccomment'>//! # use chrono::offset::TimeZone;</span>
+<span class='doccomment'>//! # use std::error::Error;</span>
+<span class='doccomment'>//! # use std::io::{self, Write};</span>
+<span class='doccomment'>//! # use warheadhateus::{AWSAuth, hashed_data, HttpRequestMethod, Region, Service};</span>
+<span class='doccomment'>//! #</span>
+<span class='doccomment'>//! # const DATE_TIME_FMT: &amp;&#39;static str = &quot;%Y%m%dT%H%M%SZ&quot;;</span>
+<span class='doccomment'>//! # const SCOPE_DATE: &amp;&#39;static str = &quot;20130524T000000Z&quot;;</span>
+<span class='doccomment'>//! # const ACCESS_KEY_ID: &amp;&#39;static str = &quot;AKIAIOSFODNN7EXAMPLE&quot;;</span>
+<span class='doccomment'>//! # const SECRET_ACCESS_KEY: &amp;&#39;static str = &quot;wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY&quot;;</span>
+<span class='doccomment'>//! # const HOST: &amp;&#39;static str = &quot;examplebucket.s3.amazonaws.com&quot;;</span>
+<span class='doccomment'>//! # const URL_1: &amp;&#39;static str = &quot;https://examplebucket.s3.amazonaws.com/test.txt&quot;;</span>
+<span class='doccomment'>//! # const AWS_TEST_1: &amp;&#39;static str = &quot;AWS4-HMAC-SHA256 \</span>
+<span class='doccomment'>//! # Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request,\</span>
+<span class='doccomment'>//! # SignedHeaders=host;range;x-amz-content-sha256;x-amz-date,\</span>
+<span class='doccomment'>//! # Signature=f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd91039c6036bdb41&quot;;</span>
+<span class='doccomment'>//! #</span>
+<span class='doccomment'>//! # fn fail&lt;T&gt;(e: T) -&gt; ! where T: Error {</span>
+<span class='doccomment'>//! #     writeln!(io::stderr(), &quot;{}&quot;, e).expect(&quot;Unable to write to stderr!&quot;);</span>
+<span class='doccomment'>//! #     panic!();</span>
+<span class='doccomment'>//! # }</span>
+<span class='doccomment'>//! #</span>
 <span class='doccomment'>//! # fn main() {</span>
-<span class='doccomment'>//! use chrono::UTC;</span>
-<span class='doccomment'>//! use chrono::offset::TimeZone;</span>
-<span class='doccomment'>//! use std::io::{self, Write};</span>
-<span class='doccomment'>//! use warheadhateus::{AWSAuth, hashed_data, HttpRequestMethod, Region, Service};</span>
+<span class='doccomment'>//! let mut auth = AWSAuth::new(URL_1).unwrap_or_else(|e| fail(e));</span>
+<span class='doccomment'>//! let payload_hash = hashed_data(None).unwrap_or_else(|e| fail(e));</span>
+<span class='doccomment'>//! let scope_date = UTC.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT).unwrap_or_else(|e| fail(e));</span>
+<span class='doccomment'>//! auth.set_request_type(HttpRequestMethod::GET);</span>
+<span class='doccomment'>//! auth.set_payload_hash(&amp;payload_hash);</span>
+<span class='doccomment'>//! auth.set_date(scope_date);</span>
+<span class='doccomment'>//! auth.set_service(Service::S3);</span>
+<span class='doccomment'>//! auth.set_access_key_id(ACCESS_KEY_ID);</span>
+<span class='doccomment'>//! auth.set_secret_access_key(SECRET_ACCESS_KEY);</span>
+<span class='doccomment'>//! auth.set_region(Region::UsEast1);</span>
+<span class='doccomment'>//! auth.add_header(&quot;HOST&quot;, HOST);</span>
+<span class='doccomment'>//! auth.add_header(&quot;x-amz-content-sha256&quot;, &amp;payload_hash);</span>
+<span class='doccomment'>//! auth.add_header(&quot;x-amz-date&quot;, SCOPE_DATE);</span>
+<span class='doccomment'>//! auth.add_header(&quot;Range&quot;, &quot;bytes=0-9&quot;);</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! const DATE_TIME_FMT: &amp;&#39;static str = &quot;%Y%m%dT%H%M%SZ&quot;;</span>
-<span class='doccomment'>//! const SCOPE_DATE: &amp;&#39;static str = &quot;20130524T000000Z&quot;;</span>
-<span class='doccomment'>//! const ACCESS_KEY_ID: &amp;&#39;static str = &quot;AKIAIOSFODNN7EXAMPLE&quot;;</span>
-<span class='doccomment'>//! const SECRET_ACCESS_KEY: &amp;&#39;static str = &quot;wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY&quot;;</span>
-<span class='doccomment'>//! const HOST: &amp;&#39;static str = &quot;examplebucket.s3.amazonaws.com&quot;;</span>
-<span class='doccomment'>//! const AWS_TEST_1: &amp;&#39;static str = &quot;AWS4-HMAC-SHA256 \</span>
-<span class='doccomment'>//! Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request,\</span>
-<span class='doccomment'>//! SignedHeaders=host;range;x-amz-content-sha256;x-amz-date,\</span>
-<span class='doccomment'>//! Signature=f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd91039c6036bdb41&quot;;</span>
-<span class='doccomment'>//!</span>
-<span class='doccomment'>//! match AWSAuth::new(&quot;https://examplebucket.s3.amazonaws.com/test.txt&quot;) {</span>
-<span class='doccomment'>//!     Ok(mut auth) =&gt; {</span>
-<span class='doccomment'>//!         let payload_hash = match hashed_data(None) {</span>
-<span class='doccomment'>//!             Ok(ph) =&gt; ph,</span>
-<span class='doccomment'>//!             Err(e) =&gt; {</span>
-<span class='doccomment'>//!                 writeln!(io::stderr(), &quot;{}&quot;, e).expect(&quot;Unable to write to stderr!&quot;);</span>
-<span class='doccomment'>//!                 &quot;&quot;.to_owned()</span>
-<span class='doccomment'>//!             }</span>
-<span class='doccomment'>//!         };</span>
-<span class='doccomment'>//!         let scope_date = UTC.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT)</span>
-<span class='doccomment'>//!                             .expect(&quot;Unable to parse date!&quot;);</span>
-<span class='doccomment'>//!         auth.set_request_type(HttpRequestMethod::GET);</span>
-<span class='doccomment'>//!         auth.set_payload_hash(&amp;payload_hash);</span>
-<span class='doccomment'>//!         auth.set_date(scope_date);</span>
-<span class='doccomment'>//!         auth.set_service(Service::S3);</span>
-<span class='doccomment'>//!         auth.set_access_key_id(ACCESS_KEY_ID);</span>
-<span class='doccomment'>//!         auth.set_secret_access_key(SECRET_ACCESS_KEY);</span>
-<span class='doccomment'>//!         auth.set_region(Region::UsEast1);</span>
-<span class='doccomment'>//!         auth.add_header(&quot;HOST&quot;, HOST);</span>
-<span class='doccomment'>//!         auth.add_header(&quot;x-amz-content-sha256&quot;, &amp;payload_hash);</span>
-<span class='doccomment'>//!         auth.add_header(&quot;x-amz-date&quot;, SCOPE_DATE);</span>
-<span class='doccomment'>//!         auth.add_header(&quot;Range&quot;, &quot;bytes=0-9&quot;);</span>
-<span class='doccomment'>//!</span>
-<span class='doccomment'>//!         match auth.auth_header() {</span>
-<span class='doccomment'>//!             Ok(ah) =&gt; {</span>
-<span class='doccomment'>//!                 writeln!(io::stdout(), &quot;{}&quot;, ah).expect(&quot;Unable to write to stdout!&quot;);</span>
-<span class='doccomment'>//!                 writeln!(io::stdout(), &quot;{}&quot;, AWS_TEST_1)</span>
-<span class='doccomment'>//!                     .expect(&quot;Unable to write to stdout!&quot;);</span>
-<span class='doccomment'>//!                 assert!(ah == AWS_TEST_1)</span>
-<span class='doccomment'>//!             }</span>
-<span class='doccomment'>//!             Err(e) =&gt; {</span>
-<span class='doccomment'>//!                 writeln!(io::stderr(), &quot;{}&quot;, e).expect(&quot;Unable to write to stderr!&quot;);</span>
-<span class='doccomment'>//!                 assert!(false);</span>
-<span class='doccomment'>//!             }</span>
-<span class='doccomment'>//!         }</span>
-<span class='doccomment'>//!     }</span>
-<span class='doccomment'>//!     Err(e) =&gt; {</span>
-<span class='doccomment'>//!         writeln!(io::stderr(), &quot;{}&quot;, e).expect(&quot;Unable to write to stderr!&quot;);</span>
-<span class='doccomment'>//!         assert!(false);</span>
-<span class='doccomment'>//!     }</span>
-<span class='doccomment'>//! }</span>
+<span class='doccomment'>//! let ah = auth.auth_header().unwrap_or_else(|e| fail(e));</span>
+<span class='doccomment'>//! assert!(ah == AWS_TEST_1);</span>
 <span class='doccomment'>//! # }</span>
 <span class='doccomment'>//! ```</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;clippy&quot;</span>, <span class='ident'>feature</span>(<span class='ident'>plugin</span>))]</span>
@@ -930,13 +979,12 @@
 <span class='kw'>mod</span> <span class='ident'>utils</span>;
 
 <span class='kw'>use</span> <span class='ident'>chrono</span>::{<span class='ident'>DateTime</span>, <span class='ident'>UTC</span>};
-<span class='kw'>use</span> <span class='ident'>error</span>::<span class='ident'>AWSAuthError</span>;
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>error</span>::<span class='ident'>AWSAuthError</span>;
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>mode</span>::<span class='ident'>Mode</span>;
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>region</span>::<span class='ident'>Region</span>;
 <span class='kw'>use</span> <span class='ident'>rustc_serialize</span>::<span class='ident'>hex</span>::<span class='ident'>ToHex</span>;
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>service</span>::<span class='ident'>Service</span>;
 <span class='kw'>use</span> <span class='ident'>sodium_sys</span>::<span class='ident'>crypto</span>::<span class='ident'>utils</span>::<span class='ident'>init</span>;
-<span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>SAM</span>::<span class='ident'>AWS4HMACSHA256</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fmt</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::{<span class='ident'>ONCE_INIT</span>, <span class='ident'>Once</span>};
@@ -958,37 +1006,37 @@
 
 <span class='doccomment'>/// Amazon Web Service Authorization Header struct</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>AWSAuth</span> {
-    <span class='ident'>mode</span>: <span class='ident'>Mode</span>,
-    <span class='ident'>req_type</span>: <span class='ident'>HttpRequestMethod</span>,
-    <span class='ident'>path</span>: <span class='ident'>String</span>,
-    <span class='ident'>query</span>: <span class='ident'>String</span>,
-    <span class='ident'>sam</span>: <span class='ident'>SAM</span>,
     <span class='ident'>access_key_id</span>: <span class='ident'>String</span>,
-    <span class='ident'>secret_access_key</span>: <span class='ident'>String</span>,
-    <span class='ident'>region</span>: <span class='ident'>Region</span>,
+    <span class='ident'>chunk_size</span>: <span class='ident'>usize</span>,
     <span class='ident'>date</span>: <span class='ident'>DateTime</span><span class='op'>&lt;</span><span class='ident'>UTC</span><span class='op'>&gt;</span>,
-    <span class='ident'>service</span>: <span class='ident'>Service</span>,
     <span class='ident'>headers</span>: <span class='ident'>HashMap</span><span class='op'>&lt;</span><span class='ident'>String</span>, <span class='ident'>String</span><span class='op'>&gt;</span>,
+    <span class='ident'>mode</span>: <span class='ident'>Mode</span>,
+    <span class='ident'>path</span>: <span class='ident'>String</span>,
     <span class='ident'>payload_hash</span>: <span class='ident'>String</span>,
-    <span class='ident'>chunk_size</span>: <span class='ident'>u32</span>,
+    <span class='ident'>query</span>: <span class='ident'>String</span>,
+    <span class='ident'>region</span>: <span class='ident'>Region</span>,
+    <span class='ident'>req_type</span>: <span class='ident'>HttpRequestMethod</span>,
+    <span class='ident'>sam</span>: <span class='ident'>SAM</span>,
+    <span class='ident'>secret_access_key</span>: <span class='ident'>String</span>,
+    <span class='ident'>service</span>: <span class='ident'>Service</span>,
 }
 
 <span class='kw'>impl</span> <span class='ident'>Default</span> <span class='kw'>for</span> <span class='ident'>AWSAuth</span> {
     <span class='kw'>fn</span> <span class='ident'>default</span>() <span class='op'>-&gt;</span> <span class='ident'>AWSAuth</span> {
         <span class='ident'>AWSAuth</span> {
-            <span class='ident'>mode</span>: <span class='ident'>Mode</span>::<span class='ident'>Normal</span>,
-            <span class='ident'>req_type</span>: <span class='ident'>HttpRequestMethod</span>::<span class='ident'>GET</span>,
-            <span class='ident'>path</span>: <span class='ident'>String</span>::<span class='ident'>new</span>(),
-            <span class='ident'>query</span>: <span class='ident'>String</span>::<span class='ident'>new</span>(),
-            <span class='ident'>sam</span>: <span class='ident'>AWS4HMACSHA256</span>,
             <span class='ident'>access_key_id</span>: <span class='ident'>String</span>::<span class='ident'>new</span>(),
-            <span class='ident'>secret_access_key</span>: <span class='ident'>String</span>::<span class='ident'>new</span>(),
-            <span class='ident'>region</span>: <span class='ident'>Region</span>::<span class='ident'>UsEast1</span>,
-            <span class='ident'>date</span>: <span class='ident'>UTC</span>::<span class='ident'>now</span>(),
-            <span class='ident'>service</span>: <span class='ident'>Service</span>::<span class='ident'>S3</span>,
-            <span class='ident'>headers</span>: <span class='ident'>HashMap</span>::<span class='ident'>new</span>(),
-            <span class='ident'>payload_hash</span>: <span class='ident'>String</span>::<span class='ident'>new</span>(),
             <span class='ident'>chunk_size</span>: <span class='number'>0</span>,
+            <span class='ident'>date</span>: <span class='ident'>UTC</span>::<span class='ident'>now</span>(),
+            <span class='ident'>headers</span>: <span class='ident'>HashMap</span>::<span class='ident'>new</span>(),
+            <span class='ident'>mode</span>: <span class='ident'>Mode</span>::<span class='ident'>Normal</span>,
+            <span class='ident'>path</span>: <span class='ident'>String</span>::<span class='ident'>new</span>(),
+            <span class='ident'>payload_hash</span>: <span class='ident'>String</span>::<span class='ident'>new</span>(),
+            <span class='ident'>query</span>: <span class='ident'>String</span>::<span class='ident'>new</span>(),
+            <span class='ident'>region</span>: <span class='ident'>Region</span>::<span class='ident'>UsEast1</span>,
+            <span class='ident'>req_type</span>: <span class='ident'>HttpRequestMethod</span>::<span class='ident'>GET</span>,
+            <span class='ident'>sam</span>: <span class='ident'>SAM</span>::<span class='ident'>AWS4HMACSHA256</span>,
+            <span class='ident'>secret_access_key</span>: <span class='ident'>String</span>::<span class='ident'>new</span>(),
+            <span class='ident'>service</span>: <span class='ident'>Service</span>::<span class='ident'>S3</span>,
         }
     }
 }
@@ -998,6 +1046,21 @@
 
 <span class='kw'>impl</span> <span class='ident'>AWSAuth</span> {
     <span class='doccomment'>/// Create a new AWSAuth struct.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>/// use warheadhateus::AWSAuth;</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// match AWSAuth::new(&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;) {</span>
+    <span class='doccomment'>///     Ok(auth) =&gt; {</span>
+    <span class='doccomment'>///         // Do fun stuff with the auth struct</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>///     Err(_) =&gt; {</span>
+    <span class='doccomment'>///         // Failure</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>/// }</span>
+    <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>url</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>AWSAuth</span>, <span class='ident'>AWSAuthError</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>parsed</span> <span class='op'>=</span> <span class='ident'>urlparse</span>(<span class='ident'>url</span>);
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>auth</span> <span class='op'>=</span> <span class='ident'>AWSAuth</span> { <span class='ident'>path</span>: <span class='ident'>parsed</span>.<span class='ident'>path</span>, ..<span class='ident'>Default</span>::<span class='ident'>default</span>() };
@@ -1009,68 +1072,256 @@
         <span class='prelude-val'>Ok</span>(<span class='ident'>auth</span>)
     }
 
-    <span class='doccomment'>/// Add a header field to the AWSAuth struct.</span>
+    <span class='doccomment'>/// Add a header key/value pair.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>/// use warheadhateus::AWSAuth;</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// match AWSAuth::new(&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;) {</span>
+    <span class='doccomment'>///     Ok(mut auth) =&gt; {</span>
+    <span class='doccomment'>///         auth.add_header(&quot;Host&quot;, &quot;s3.amazonaws.com&quot;);</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>///     Err(_) =&gt; {</span>
+    <span class='doccomment'>///         // Failure</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>/// }</span>
+    <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>add_header</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>key</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>val</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>AWSAuth</span> {
         <span class='self'>self</span>.<span class='ident'>headers</span>.<span class='ident'>insert</span>(<span class='ident'>key</span>.<span class='ident'>to_owned</span>(), <span class='ident'>val</span>.<span class='ident'>to_owned</span>());
         <span class='self'>self</span>
     }
 
     <span class='doccomment'>/// Set the AWS Access Key ID (this is supplied by Amazon).</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>/// use warheadhateus::AWSAuth;</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// match AWSAuth::new(&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;) {</span>
+    <span class='doccomment'>///     Ok(mut auth) =&gt; {</span>
+    <span class='doccomment'>///         auth.set_access_key_id(&quot;AKIAIOSFODNN7EXAMPLE&quot;);</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>///     Err(_) =&gt; {</span>
+    <span class='doccomment'>///         // Failure</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>/// }</span>
+    <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_access_key_id</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>access_key_id</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>AWSAuth</span> {
         <span class='self'>self</span>.<span class='ident'>access_key_id</span> <span class='op'>=</span> <span class='ident'>access_key_id</span>.<span class='ident'>to_owned</span>();
         <span class='self'>self</span>
     }
 
     <span class='doccomment'>/// Set the chunk size.</span>
-    <span class='doccomment'>/// * Note this is only used when Mode::Chunk is selected.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// * Note this is only used when ```Mode::Chunked``` is selected.</span>
     <span class='doccomment'>/// * Chunk size must be at least 8 KB. We recommend a chunk size of a least 64 KB for better</span>
-    <span class='doccomment'>/// performance. This chunk size applies to all chunk except the last one. The last chunk you</span>
-    <span class='doccomment'>/// send can be smaller than 8 KB. If your payload is small and can fit in one chunk, then it</span>
-    <span class='doccomment'>/// can be smaller than the 8 KB.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_chunk_size</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>chunk_size</span>: <span class='ident'>u32</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>AWSAuth</span> {
+    <span class='doccomment'>/// performance. This chunk size applies to all CHUNK_SIG_3 except the last one. The last chunk</span>
+    <span class='doccomment'>/// you send can be smaller than 8 KB. If your payload is small and can fit in one chunk, then</span>
+    <span class='doccomment'>/// it can be smaller than the 8 KB.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>/// use warheadhateus::{AWSAuth, Mode};</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// match AWSAuth::new(&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;) {</span>
+    <span class='doccomment'>///     Ok(mut auth) =&gt; {</span>
+    <span class='doccomment'>///         auth.set_mode(Mode::Chunked);</span>
+    <span class='doccomment'>///         auth.set_chunk_size(65536);</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>///     Err(_) =&gt; {</span>
+    <span class='doccomment'>///         // Failure</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>/// }</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_chunk_size</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>chunk_size</span>: <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>AWSAuth</span> {
         <span class='self'>self</span>.<span class='ident'>chunk_size</span> <span class='op'>=</span> <span class='ident'>chunk_size</span>;
         <span class='self'>self</span>
     }
 
-    <span class='doccomment'>/// Set the scope date for the auth request.  Request are valid for 7 days from the given date.</span>
+    <span class='doccomment'>/// Set the scope date for the auth request.</span>
+    <span class='doccomment'>///</span>
     <span class='doccomment'>/// * Note that this date doesn&#39;t have to match the *x-amz-date* or *date* header values.</span>
+    <span class='doccomment'>/// * Requests are valid for 7 days from the given scope date.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>/// # extern crate chrono;</span>
+    <span class='doccomment'>/// # extern crate warheadhateus;</span>
+    <span class='doccomment'>/// #</span>
+    <span class='doccomment'>/// # fn main() {</span>
+    <span class='doccomment'>/// use chrono::UTC;</span>
+    <span class='doccomment'>/// use warheadhateus::AWSAuth;</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// match AWSAuth::new(&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;) {</span>
+    <span class='doccomment'>///     Ok(mut auth) =&gt; {</span>
+    <span class='doccomment'>///         auth.set_date(UTC::now());</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>///     Err(_) =&gt; {</span>
+    <span class='doccomment'>///         // Failure</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>/// }</span>
+    <span class='doccomment'>/// # }</span>
+    <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_date</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>date</span>: <span class='ident'>DateTime</span><span class='op'>&lt;</span><span class='ident'>UTC</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>AWSAuth</span> {
         <span class='self'>self</span>.<span class='ident'>date</span> <span class='op'>=</span> <span class='ident'>date</span>;
         <span class='self'>self</span>
     }
 
     <span class='doccomment'>/// Set the mode of operation.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>/// use warheadhateus::{AWSAuth, Mode};</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// match AWSAuth::new(&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;) {</span>
+    <span class='doccomment'>///     Ok(mut auth) =&gt; {</span>
+    <span class='doccomment'>///         auth.set_mode(Mode::Chunked);</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>///     Err(_) =&gt; {</span>
+    <span class='doccomment'>///         // Failure</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>/// }</span>
+    <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_mode</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>mode</span>: <span class='ident'>Mode</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>AWSAuth</span> {
         <span class='self'>self</span>.<span class='ident'>mode</span> <span class='op'>=</span> <span class='ident'>mode</span>;
         <span class='self'>self</span>
     }
 
-    <span class='doccomment'>/// Set the payload hash.  This should be the hash of any request payload, or the hash of the</span>
-    <span class='doccomment'>/// empty string (&quot;&quot;) if there is no payload.</span>
+    <span class='doccomment'>/// Set the payload hash.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// This should be the SHA-256 hash of any request payload, or the hash</span>
+    <span class='doccomment'>/// of the empty string (&quot;&quot;) if there is no payload.  There is a ```hashed_data``` function in</span>
+    <span class='doccomment'>/// this library that will do this for you, but you are free to use any SHA-256 implementation.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>/// use warheadhateus::{AWSAuth, hashed_data};</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// match AWSAuth::new(&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;) {</span>
+    <span class='doccomment'>///     Ok(mut auth) =&gt; {</span>
+    <span class='doccomment'>///         if let Ok(hd) = hashed_data(Some(b&quot;This is a test&quot;)) {</span>
+    <span class='doccomment'>///             auth.set_payload_hash(&amp;hd);</span>
+    <span class='doccomment'>///         }</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>///     Err(_) =&gt; {</span>
+    <span class='doccomment'>///         // Failure</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>/// }</span>
+    <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_payload_hash</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>payload_hash</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>AWSAuth</span> {
         <span class='self'>self</span>.<span class='ident'>payload_hash</span> <span class='op'>=</span> <span class='ident'>payload_hash</span>.<span class='ident'>to_owned</span>();
         <span class='self'>self</span>
     }
 
     <span class='doccomment'>/// Set the region the request is scoped for.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>/// use warheadhateus::{AWSAuth, Region};</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// match AWSAuth::new(&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;) {</span>
+    <span class='doccomment'>///     Ok(mut auth) =&gt; {</span>
+    <span class='doccomment'>///         auth.set_region(Region::UsWest1);</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>///     Err(_) =&gt; {</span>
+    <span class='doccomment'>///         // Failure</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>/// }</span>
+    <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_region</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>region</span>: <span class='ident'>Region</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>AWSAuth</span> {
         <span class='self'>self</span>.<span class='ident'>region</span> <span class='op'>=</span> <span class='ident'>region</span>;
         <span class='self'>self</span>
     }
 
     <span class='doccomment'>/// Set the request verb (i.e. GET, PUT, POST, DELETE)</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>/// use warheadhateus::{AWSAuth, HttpRequestMethod};</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// match AWSAuth::new(&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;) {</span>
+    <span class='doccomment'>///     Ok(mut auth) =&gt; {</span>
+    <span class='doccomment'>///         auth.set_request_type(HttpRequestMethod::PUT);</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>///     Err(_) =&gt; {</span>
+    <span class='doccomment'>///         // Failure</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>/// }</span>
+    <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_request_type</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>verb</span>: <span class='ident'>HttpRequestMethod</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>AWSAuth</span> {
         <span class='self'>self</span>.<span class='ident'>req_type</span> <span class='op'>=</span> <span class='ident'>verb</span>;
         <span class='self'>self</span>
     }
 
     <span class='doccomment'>/// Set the AWS Secret Access Key (this is supplied by Amazon).</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>/// use warheadhateus::AWSAuth;</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// match AWSAuth::new(&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;) {</span>
+    <span class='doccomment'>///     Ok(mut auth) =&gt; {</span>
+    <span class='doccomment'>///         auth.set_secret_access_key(&quot;wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY&quot;);</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>///     Err(_) =&gt; {</span>
+    <span class='doccomment'>///         // Failure</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>/// }</span>
+    <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_secret_access_key</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>secret_access_key</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>AWSAuth</span> {
         <span class='self'>self</span>.<span class='ident'>secret_access_key</span> <span class='op'>=</span> <span class='ident'>secret_access_key</span>.<span class='ident'>to_owned</span>();
         <span class='self'>self</span>
     }
 
-    <span class='doccomment'>/// Set the AWS services this request should be constructed for (i.e. s3)</span>
+    <span class='doccomment'>/// Set the Signing Algorithm Moniker (SAM).</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// * Note that the default is usually acceptable here, only chunked requests need to change it.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>/// use warheadhateus::{AWSAuth, SAM};</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// match AWSAuth::new(&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;) {</span>
+    <span class='doccomment'>///     Ok(mut auth) =&gt; {</span>
+    <span class='doccomment'>///         auth.set_sam(SAM::AWS4HMACSHA256PAYLOAD);</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>///     Err(_) =&gt; {</span>
+    <span class='doccomment'>///         // Failure</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>/// }</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_sam</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>sam</span>: <span class='ident'>SAM</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>AWSAuth</span> {
+        <span class='self'>self</span>.<span class='ident'>sam</span> <span class='op'>=</span> <span class='ident'>sam</span>;
+        <span class='self'>self</span>
+    }
+
+    <span class='doccomment'>/// Set the AWS services this request should be constructed for (i.e. S3)</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>/// use warheadhateus::{AWSAuth, Service};</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// match AWSAuth::new(&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;) {</span>
+    <span class='doccomment'>///     Ok(mut auth) =&gt; {</span>
+    <span class='doccomment'>///         auth.set_service(Service::S3);</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>///     Err(_) =&gt; {</span>
+    <span class='doccomment'>///         // Failure</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>/// }</span>
+    <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_service</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>service</span>: <span class='ident'>Service</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>AWSAuth</span> {
         <span class='self'>self</span>.<span class='ident'>service</span> <span class='op'>=</span> <span class='ident'>service</span>;
         <span class='self'>self</span>
@@ -1165,6 +1416,24 @@
         <span class='ident'>buf</span>
     }
 
+    <span class='kw'>fn</span> <span class='ident'>sign_string</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>string_to_sign</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>AWSAuthResult</span> {
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>key</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>from</span>(<span class='string'>&quot;AWS4&quot;</span>);
+        <span class='ident'>key</span>.<span class='ident'>push_str</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>secret_access_key</span>);
+
+        <span class='kw'>let</span> <span class='ident'>date</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>date</span>.<span class='ident'>format</span>(<span class='ident'>DATE_FMT</span>).<span class='ident'>to_string</span>();
+        <span class='kw'>let</span> <span class='ident'>region</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>region</span>.<span class='ident'>to_string</span>();
+        <span class='kw'>let</span> <span class='ident'>service</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>service</span>.<span class='ident'>to_string</span>();
+        <span class='kw'>let</span> <span class='ident'>aws4</span> <span class='op'>=</span> <span class='ident'>AWS4_REQUEST</span>.<span class='ident'>as_bytes</span>();
+        <span class='kw'>let</span> <span class='ident'>date_key</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>utils</span>::<span class='ident'>signed_data</span>(<span class='ident'>date</span>.<span class='ident'>as_bytes</span>(), <span class='ident'>key</span>.<span class='ident'>as_bytes</span>()));
+        <span class='kw'>let</span> <span class='ident'>date_region_key</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>utils</span>::<span class='ident'>signed_data</span>(<span class='ident'>region</span>.<span class='ident'>as_bytes</span>(), <span class='kw-2'>&amp;</span><span class='ident'>date_key</span>));
+        <span class='kw'>let</span> <span class='ident'>date_region_service_key</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>utils</span>::<span class='ident'>signed_data</span>(<span class='ident'>service</span>.<span class='ident'>as_bytes</span>(),
+                                                              <span class='kw-2'>&amp;</span><span class='ident'>date_region_key</span>));
+        <span class='kw'>let</span> <span class='ident'>signing_key</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>utils</span>::<span class='ident'>signed_data</span>(<span class='ident'>aws4</span>, <span class='kw-2'>&amp;</span><span class='ident'>date_region_service_key</span>));
+        <span class='kw'>let</span> <span class='ident'>signature</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>utils</span>::<span class='ident'>signed_data</span>(<span class='ident'>string_to_sign</span>.<span class='ident'>as_bytes</span>(), <span class='kw-2'>&amp;</span><span class='ident'>signing_key</span>));
+        <span class='macro'>debug</span><span class='macro'>!</span>(<span class='string'>&quot;Signature\n{}&quot;</span>, <span class='ident'>signature</span>.<span class='ident'>to_hex</span>());
+        <span class='prelude-val'>Ok</span>(<span class='ident'>signature</span>.<span class='ident'>to_hex</span>())
+    }
+
     <span class='kw'>fn</span> <span class='ident'>signature</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>seed</span>: <span class='ident'>bool</span>) <span class='op'>-&gt;</span> <span class='ident'>AWSAuthResult</span> {
         <span class='kw'>let</span> <span class='ident'>hash</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>seed</span> {
             <span class='string'>&quot;STREAMING-AWS4-HMAC-SHA256-PAYLOAD&quot;</span>
@@ -1183,48 +1452,194 @@
                                      <span class='self'>self</span>.<span class='ident'>sam</span>,
                                      <span class='self'>self</span>.<span class='ident'>date</span>.<span class='ident'>format</span>(<span class='ident'>DATE_TIME_FMT</span>),
                                      <span class='self'>self</span>.<span class='ident'>scope</span>(),
-                                     <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>utils</span>::<span class='ident'>hashed_data</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>canonical_request</span>))));
+                                     <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>utils</span>::<span class='ident'>hashed_data</span>(<span class='prelude-val'>Some</span>(<span class='ident'>canonical_request</span>.<span class='ident'>as_bytes</span>()))));
         <span class='macro'>debug</span><span class='macro'>!</span>(<span class='string'>&quot;StringToSign\n{}&quot;</span>, <span class='ident'>string_to_sign</span>);
 
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>key</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>from</span>(<span class='string'>&quot;AWS4&quot;</span>);
-        <span class='ident'>key</span>.<span class='ident'>push_str</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>secret_access_key</span>);
-
-        <span class='kw'>let</span> <span class='ident'>date</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>date</span>.<span class='ident'>format</span>(<span class='ident'>DATE_FMT</span>).<span class='ident'>to_string</span>();
-        <span class='kw'>let</span> <span class='ident'>region</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>region</span>.<span class='ident'>to_string</span>();
-        <span class='kw'>let</span> <span class='ident'>service</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>service</span>.<span class='ident'>to_string</span>();
-        <span class='kw'>let</span> <span class='ident'>aws4</span> <span class='op'>=</span> <span class='ident'>AWS4_REQUEST</span>.<span class='ident'>as_bytes</span>();
-        <span class='kw'>let</span> <span class='ident'>date_key</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>utils</span>::<span class='ident'>signed_data</span>(<span class='ident'>date</span>.<span class='ident'>as_bytes</span>(), <span class='ident'>key</span>.<span class='ident'>as_bytes</span>()));
-        <span class='kw'>let</span> <span class='ident'>date_region_key</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>utils</span>::<span class='ident'>signed_data</span>(<span class='ident'>region</span>.<span class='ident'>as_bytes</span>(), <span class='kw-2'>&amp;</span><span class='ident'>date_key</span>));
-        <span class='kw'>let</span> <span class='ident'>date_region_service_key</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>utils</span>::<span class='ident'>signed_data</span>(<span class='ident'>service</span>.<span class='ident'>as_bytes</span>(),
-                                                              <span class='kw-2'>&amp;</span><span class='ident'>date_region_key</span>));
-        <span class='kw'>let</span> <span class='ident'>signing_key</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>utils</span>::<span class='ident'>signed_data</span>(<span class='ident'>aws4</span>, <span class='kw-2'>&amp;</span><span class='ident'>date_region_service_key</span>));
-        <span class='kw'>let</span> <span class='ident'>signature</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>utils</span>::<span class='ident'>signed_data</span>(<span class='ident'>string_to_sign</span>.<span class='ident'>as_bytes</span>(), <span class='kw-2'>&amp;</span><span class='ident'>signing_key</span>));
-        <span class='macro'>debug</span><span class='macro'>!</span>(<span class='string'>&quot;Signature\n{}&quot;</span>, <span class='ident'>signature</span>.<span class='ident'>to_hex</span>());
-        <span class='prelude-val'>Ok</span>(<span class='ident'>signature</span>.<span class='ident'>to_hex</span>())
+        <span class='self'>self</span>.<span class='ident'>sign_string</span>(<span class='kw-2'>&amp;</span><span class='ident'>string_to_sign</span>)
     }
 
     <span class='doccomment'>/// Create the AWS S3 Authorization HTTP header.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>/// use std::io::{self, Write};</span>
+    <span class='doccomment'>/// use warheadhateus::AWSAuth;</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// match AWSAuth::new(&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;) {</span>
+    <span class='doccomment'>///     Ok(mut auth) =&gt; {</span>
+    <span class='doccomment'>///         if let Ok(ah) = auth.auth_header() {</span>
+    <span class='doccomment'>///             writeln!(io::stdout(), &quot;{}&quot;, ah).expect(&quot;Unable to write to stdout!&quot;);</span>
+    <span class='doccomment'>///         }</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>///     Err(_) =&gt; {</span>
+    <span class='doccomment'>///         // Failure</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>/// }</span>
+    <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>auth_header</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>AWSAuthResult</span> {
         <span class='ident'>init</span>();
+        <span class='kw'>let</span> <span class='ident'>signature</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>mode</span> {
+            <span class='ident'>Mode</span>::<span class='ident'>Normal</span> <span class='op'>=&gt;</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>signature</span>(<span class='boolval'>false</span>)),
+            <span class='ident'>Mode</span>::<span class='ident'>Chunked</span> <span class='op'>=&gt;</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>signature</span>(<span class='boolval'>true</span>)),
+        };
+        <span class='prelude-val'>Ok</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{} Credential={},SignedHeaders={},Signature={}&quot;</span>,
+                   <span class='self'>self</span>.<span class='ident'>sam</span>,
+                   <span class='self'>self</span>.<span class='ident'>credential</span>(),
+                   <span class='self'>self</span>.<span class='ident'>signed_headers</span>(),
+                   <span class='ident'>signature</span>))
+    }
+
+    <span class='doccomment'>/// Generate the seed signature for chunked mode.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>/// use std::io::{self, Write};</span>
+    <span class='doccomment'>/// use warheadhateus::{AWSAuth, Mode};</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// match AWSAuth::new(&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;) {</span>
+    <span class='doccomment'>///     Ok(mut auth) =&gt; {</span>
+    <span class='doccomment'>///         auth.set_mode(Mode::Chunked);</span>
+    <span class='doccomment'>///         auth.set_chunk_size(65536);</span>
+    <span class='doccomment'>///         if let Ok(ss) = auth.seed_signature() {</span>
+    <span class='doccomment'>///             writeln!(io::stdout(), &quot;{}&quot;, ss).expect(&quot;Unable to write to stdout!&quot;);</span>
+    <span class='doccomment'>///         }</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>///     Err(_) =&gt; {</span>
+    <span class='doccomment'>///         // Failure</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>/// }</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>seed_signature</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>AWSAuthResult</span> {
         <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>mode</span> {
-            <span class='ident'>Mode</span>::<span class='ident'>Normal</span> <span class='op'>=&gt;</span> {
-                <span class='prelude-val'>Ok</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{} Credential={},SignedHeaders={},Signature={}&quot;</span>,
-                           <span class='self'>self</span>.<span class='ident'>sam</span>,
-                           <span class='self'>self</span>.<span class='ident'>credential</span>(),
-                           <span class='self'>self</span>.<span class='ident'>signed_headers</span>(),
-                           <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>signature</span>(<span class='boolval'>false</span>))))
-            }
+            <span class='ident'>Mode</span>::<span class='ident'>Chunked</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>signature</span>(<span class='boolval'>true</span>))),
+            _ <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>AWSAuthError</span>::<span class='ident'>ModeError</span>),
+        }
+    }
+
+    <span class='doccomment'>/// Generate the chunk signature for a given chunk.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>/// use std::io::{self, Write};</span>
+    <span class='doccomment'>/// use warheadhateus::{AWSAuth, Mode};</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// match AWSAuth::new(&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;) {</span>
+    <span class='doccomment'>///     Ok(mut auth) =&gt; {</span>
+    <span class='doccomment'>///         auth.set_mode(Mode::Chunked);</span>
+    <span class='doccomment'>///         auth.set_chunk_size(65536);</span>
+    <span class='doccomment'>///         if let Ok(ss) = auth.seed_signature() {</span>
+    <span class='doccomment'>///             if let Ok(cs) = auth.chunk_signature(&amp;ss, &amp;[0; 100]) {</span>
+    <span class='doccomment'>///                 writeln!(io::stdout(), &quot;{}&quot;, cs).expect(&quot;Unable to write to stdout!&quot;);</span>
+    <span class='doccomment'>///             }</span>
+    <span class='doccomment'>///         }</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>///     Err(_) =&gt; {</span>
+    <span class='doccomment'>///         // Failure</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>/// }</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>chunk_signature</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>previous_signature</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>chunk</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='ident'>AWSAuthResult</span> {
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>mode</span> {
             <span class='ident'>Mode</span>::<span class='ident'>Chunked</span> <span class='op'>=&gt;</span> {
-                <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='self'>self</span>, <span class='ident'>Write</span>};
-                <span class='kw'>let</span> <span class='ident'>seed</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>signature</span>(<span class='boolval'>true</span>));
-                <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>io</span>::<span class='ident'>stdout</span>(), <span class='string'>&quot;SEED: {}&quot;</span>, <span class='ident'>seed</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unable to write to stdout!&quot;</span>);
-                <span class='prelude-val'>Ok</span>(<span class='string'>&quot;Not Implemented&quot;</span>.<span class='ident'>to_owned</span>())
+                <span class='kw'>let</span> <span class='ident'>hashed_chunk</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>chunk</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                    <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>utils</span>::<span class='ident'>hashed_data</span>(<span class='prelude-val'>None</span>))
+                } <span class='kw'>else</span> {
+                    <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>utils</span>::<span class='ident'>hashed_data</span>(<span class='prelude-val'>Some</span>(<span class='ident'>chunk</span>)))
+                };
+                <span class='kw'>let</span> <span class='ident'>string_to_sign</span> <span class='op'>=</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}\n{}\n{}\n{}\n{}\n{}&quot;</span>,
+                                             <span class='self'>self</span>.<span class='ident'>sam</span>,
+                                             <span class='self'>self</span>.<span class='ident'>date</span>.<span class='ident'>format</span>(<span class='ident'>DATE_TIME_FMT</span>),
+                                             <span class='self'>self</span>.<span class='ident'>scope</span>(),
+                                             <span class='ident'>previous_signature</span>,
+                                             <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>utils</span>::<span class='ident'>hashed_data</span>(<span class='prelude-val'>None</span>)),
+                                             <span class='ident'>hashed_chunk</span>);
+                <span class='macro'>debug</span><span class='macro'>!</span>(<span class='string'>&quot;StringToSign\n{}&quot;</span>, <span class='ident'>string_to_sign</span>);
+                <span class='prelude-val'>Ok</span>(<span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>sign_string</span>(<span class='kw-2'>&amp;</span><span class='ident'>string_to_sign</span>)))
             }
+            _ <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>AWSAuthError</span>::<span class='ident'>ModeError</span>),
+        }
+    }
+
+    <span class='doccomment'>/// Generate the chunk body for a given chunk.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>/// use std::io::{self, Write};</span>
+    <span class='doccomment'>/// use warheadhateus::{AWSAuth, Mode};</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// match AWSAuth::new(&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;) {</span>
+    <span class='doccomment'>///     Ok(mut auth) =&gt; {</span>
+    <span class='doccomment'>///         auth.set_mode(Mode::Chunked);</span>
+    <span class='doccomment'>///         auth.set_chunk_size(65536);</span>
+    <span class='doccomment'>///         if let Ok(ss) = auth.seed_signature() {</span>
+    <span class='doccomment'>///             let chunk = [0; 100];</span>
+    <span class='doccomment'>///             if let Ok(cs) = auth.chunk_signature(&amp;ss, &amp;chunk) {</span>
+    <span class='doccomment'>///                 if let Ok(cb) = auth.chunk_body(&amp;cs, &amp;chunk) {</span>
+    <span class='doccomment'>///                     let l = cb.len();</span>
+    <span class='doccomment'>///                     writeln!(io::stdout(), &quot;{}&quot;, l).expect(&quot;Unable to write to stdout!&quot;);</span>
+    <span class='doccomment'>///                 }</span>
+    <span class='doccomment'>///             }</span>
+    <span class='doccomment'>///         }</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>///     Err(_) =&gt; {</span>
+    <span class='doccomment'>///         // Failure</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>/// }</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>chunk_body</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>chunk_signature</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>chunk</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>, <span class='ident'>AWSAuthError</span><span class='op'>&gt;</span> {
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>mode</span> {
+            <span class='ident'>Mode</span>::<span class='ident'>Chunked</span> <span class='op'>=&gt;</span> {
+                <span class='kw'>let</span> <span class='ident'>hex</span> <span class='op'>=</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{:x}&quot;</span>, <span class='ident'>chunk</span>.<span class='ident'>len</span>());
+                <span class='kw'>let</span> <span class='ident'>capacity</span> <span class='op'>=</span> <span class='ident'>hex</span>.<span class='ident'>len</span>() <span class='op'>+</span> <span class='number'>85</span> <span class='op'>+</span> <span class='ident'>chunk</span>.<span class='ident'>len</span>();
+                <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>with_capacity</span>(<span class='ident'>capacity</span>);
+                <span class='ident'>buf</span>.<span class='ident'>extend</span>(<span class='ident'>hex</span>.<span class='ident'>as_bytes</span>());
+                <span class='ident'>buf</span>.<span class='ident'>extend_from_slice</span>(<span class='string'>b&quot;;chunk-signature=&quot;</span>);
+                <span class='ident'>buf</span>.<span class='ident'>extend</span>(<span class='ident'>chunk_signature</span>.<span class='ident'>as_bytes</span>());
+                <span class='ident'>buf</span>.<span class='ident'>extend_from_slice</span>(<span class='string'>b&quot;\r\n&quot;</span>);
+                <span class='ident'>buf</span>.<span class='ident'>extend_from_slice</span>(<span class='ident'>chunk</span>);
+                <span class='ident'>buf</span>.<span class='ident'>extend_from_slice</span>(<span class='string'>b&quot;\r\n&quot;</span>);
+                <span class='prelude-val'>Ok</span>(<span class='ident'>buf</span>)
+            }
+            _ <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>AWSAuthError</span>::<span class='ident'>ModeError</span>),
         }
     }
 
     <span class='doccomment'>/// Generate the value for the &#39;Content-Length&#39; header when using chunked mode.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>content_length</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>payload_size</span>: <span class='ident'>u32</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span>, <span class='ident'>AWSAuthError</span><span class='op'>&gt;</span> {
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// This function can be used for the following requirement from Amazon for pre-computing the</span>
+    <span class='doccomment'>/// `Content-Length` header.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// * When transferring data in a series of chunks, you must use the `Content-Length` HTTP</span>
+    <span class='doccomment'>/// header to explicitly specify the total content length (object length in bytes plus metadata</span>
+    <span class='doccomment'>/// in each chunk). This will require you to pre-compute the total length of the payload</span>
+    <span class='doccomment'>/// including the metadata you will send in each chunk before starting your request. The</span>
+    <span class='doccomment'>/// `x-amz-decoded-content-length` header will contain the size of the object length in bytes.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// # Examples</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>/// use std::io::{self, Write};</span>
+    <span class='doccomment'>/// use warheadhateus::{AWSAuth, Mode};</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// match AWSAuth::new(&quot;https://s3.amazonaws.com/examplebucket/test.txt&quot;) {</span>
+    <span class='doccomment'>///     Ok(mut auth) =&gt; {</span>
+    <span class='doccomment'>///         auth.set_mode(Mode::Chunked);</span>
+    <span class='doccomment'>///         auth.set_chunk_size(65536);</span>
+    <span class='doccomment'>///         if let Ok(cl) = auth.content_length(100000) {</span>
+    <span class='doccomment'>///             writeln!(io::stdout(), &quot;{}&quot;, cl).expect(&quot;Unable to write to stdout!&quot;);</span>
+    <span class='doccomment'>///         }</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>///     Err(_) =&gt; {</span>
+    <span class='doccomment'>///         // Failure</span>
+    <span class='doccomment'>///     }</span>
+    <span class='doccomment'>/// }</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>content_length</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>payload_size</span>: <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span>, <span class='ident'>AWSAuthError</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>remaining</span> <span class='op'>=</span> <span class='ident'>payload_size</span>;
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>length</span> <span class='op'>=</span> <span class='number'>0</span>;
 
@@ -1256,18 +1671,21 @@
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>SAM</span> {
     <span class='doccomment'>/// AWS Signature Version 4, HMAC-SHA256</span>
     <span class='ident'>AWS4HMACSHA256</span>,
+    <span class='doccomment'>/// AWS Signature Version 4, HMAC-SHA256 Payload (used for chunked mode).</span>
+    <span class='ident'>AWS4HMACSHA256PAYLOAD</span>,
 }
 
 <span class='kw'>impl</span> <span class='ident'>Default</span> <span class='kw'>for</span> <span class='ident'>SAM</span> {
     <span class='kw'>fn</span> <span class='ident'>default</span>() <span class='op'>-&gt;</span> <span class='ident'>SAM</span> {
-        <span class='ident'>AWS4HMACSHA256</span>
+        <span class='ident'>SAM</span>::<span class='ident'>AWS4HMACSHA256</span>
     }
 }
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>SAM</span> {
     <span class='kw'>fn</span> <span class='ident'>into</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
         <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span> {
-            <span class='ident'>AWS4HMACSHA256</span> <span class='op'>=&gt;</span> <span class='string'>&quot;AWS4-HMAC-SHA256&quot;</span>.<span class='ident'>to_owned</span>(),
+            <span class='ident'>SAM</span>::<span class='ident'>AWS4HMACSHA256</span> <span class='op'>=&gt;</span> <span class='string'>&quot;AWS4-HMAC-SHA256&quot;</span>.<span class='ident'>to_owned</span>(),
+            <span class='ident'>SAM</span>::<span class='ident'>AWS4HMACSHA256PAYLOAD</span> <span class='op'>=&gt;</span> <span class='string'>&quot;AWS4-HMAC-SHA256-PAYLOAD&quot;</span>.<span class='ident'>to_owned</span>(),
         }
     }
 }
@@ -1304,282 +1722,6 @@
 <span class='kw'>impl</span> <span class='ident'>fmt</span>::<span class='ident'>Display</span> <span class='kw'>for</span> <span class='ident'>HttpRequestMethod</span> {
     <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
         <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;{:?}&quot;</span>, <span class='self'>self</span>)
-    }
-}
-
-<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
-<span class='doccomment'>/// See [Header Based Auth][1]</span>
-<span class='doccomment'>/// [1]: (http://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html)</span>
-<span class='kw'>mod</span> <span class='ident'>tests</span> {
-    <span class='kw'>use</span> <span class='ident'>chrono</span>::<span class='ident'>UTC</span>;
-    <span class='kw'>use</span> <span class='ident'>chrono</span>::<span class='ident'>offset</span>::<span class='ident'>TimeZone</span>;
-    <span class='kw'>use</span> <span class='ident'>error</span>::<span class='ident'>AWSAuthError</span>;
-    <span class='kw'>use</span> <span class='ident'>mode</span>::<span class='ident'>Mode</span>;
-    <span class='kw'>use</span> <span class='ident'>region</span>::<span class='ident'>Region</span>;
-    <span class='kw'>use</span> <span class='ident'>service</span>::<span class='ident'>Service</span>;
-    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='self'>self</span>, <span class='ident'>Write</span>};
-    <span class='kw'>use</span> <span class='ident'>super</span>::{<span class='ident'>AWSAuth</span>, <span class='ident'>DATE_TIME_FMT</span>, <span class='ident'>HttpRequestMethod</span>};
-    <span class='kw'>use</span> <span class='ident'>utils</span>::<span class='ident'>hashed_data</span>;
-
-    <span class='kw'>const</span> <span class='ident'>SCOPE_DATE</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;20130524T000000Z&quot;</span>;
-    <span class='kw'>const</span> <span class='ident'>ACCESS_KEY_ID</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;AKIAIOSFODNN7EXAMPLE&quot;</span>;
-    <span class='kw'>const</span> <span class='ident'>SECRET_ACCESS_KEY</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY&quot;</span>;
-    <span class='kw'>const</span> <span class='ident'>HOST</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;examplebucket.s3.amazonaws.com&quot;</span>;
-
-    <span class='kw'>const</span> <span class='ident'>AWS_TEST_1</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;AWS4-HMAC-SHA256 \
-                                      Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_r\
-                                      equest,SignedHeaders=host;range;x-amz-content-sha256;\
-                                      x-amz-date,\
-                                      Signature=f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd9\
-                                      1039c6036bdb41&quot;</span>;
-    <span class='kw'>const</span> <span class='ident'>AWS_TEST_2</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;AWS4-HMAC-SHA256 \
-                                      Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_r\
-                                      equest,SignedHeaders=date;host;x-amz-content-sha256;\
-                                      x-amz-date;x-amz-storage-class,\
-                                      Signature=98ad721746da40c64f1a55b78f14c238d841ea1380cd77a1b5\
-                                      971af0ece108bd&quot;</span>;
-    <span class='kw'>const</span> <span class='ident'>AWS_TEST_3</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;AWS4-HMAC-SHA256 \
-                                      Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_r\
-                                      equest,SignedHeaders=host;x-amz-content-sha256;x-amz-date,\
-                                      Signature=fea454ca298b7da1c68078a5d1bdbfbbe0d65c699e0f91ac7a\
-                                      200a0136783543&quot;</span>;
-    <span class='kw'>const</span> <span class='ident'>AWS_TEST_4</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;AWS4-HMAC-SHA256 \
-                                      Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_r\
-                                      equest,SignedHeaders=host;x-amz-content-sha256;x-amz-date,\
-                                      Signature=34b48302e7b5fa45bde8084f4b7868a86f0a534bc59db6670e\
-                                      d5711ef69dc6f7&quot;</span>;
-
-    <span class='kw'>fn</span> <span class='ident'>test_cl</span>(<span class='ident'>auth</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>AWSAuth</span>,
-               <span class='ident'>chunk_size</span>: <span class='ident'>u32</span>,
-               <span class='ident'>payload_size</span>: <span class='ident'>u32</span>)
-               <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span>, <span class='ident'>AWSAuthError</span><span class='op'>&gt;</span> {
-        <span class='ident'>auth</span>.<span class='ident'>set_chunk_size</span>(<span class='ident'>chunk_size</span>);
-        <span class='prelude-val'>Ok</span>(<span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>auth</span>.<span class='ident'>content_length</span>(<span class='ident'>payload_size</span>)))
-    }
-
-    <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_content_length</span>() {
-        <span class='kw'>match</span> <span class='ident'>AWSAuth</span>::<span class='ident'>new</span>(<span class='string'>&quot;&quot;</span>) {
-            <span class='prelude-val'>Ok</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>auth</span>) <span class='op'>=&gt;</span> {
-                <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>test_cl</span>(<span class='ident'>auth</span>, <span class='number'>65536</span>, <span class='number'>66560</span>).<span class='ident'>expect</span>(<span class='string'>&quot;&quot;</span>) <span class='op'>==</span> <span class='number'>66824</span>);
-                <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>test_cl</span>(<span class='ident'>auth</span>, <span class='number'>1024</span>, <span class='number'>1024</span>).<span class='ident'>expect</span>(<span class='string'>&quot;&quot;</span>) <span class='op'>==</span> <span class='number'>1198</span>);
-                <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>test_cl</span>(<span class='ident'>auth</span>, <span class='number'>1024</span>, <span class='number'>2048</span>).<span class='ident'>expect</span>(<span class='string'>&quot;&quot;</span>) <span class='op'>==</span> <span class='number'>2310</span>);
-            }
-            <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> {
-                <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>io</span>::<span class='ident'>stderr</span>(), <span class='string'>&quot;{}&quot;</span>, <span class='ident'>e</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unable to write to stderr!&quot;</span>);
-                <span class='macro'>assert</span><span class='macro'>!</span>(<span class='boolval'>false</span>);
-            }
-        }
-    }
-
-    <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_get_object</span>() {
-        <span class='kw'>match</span> <span class='ident'>AWSAuth</span>::<span class='ident'>new</span>(<span class='string'>&quot;https://examplebucket.s3.amazonaws.com/test.txt&quot;</span>) {
-            <span class='prelude-val'>Ok</span>(<span class='kw-2'>mut</span> <span class='ident'>auth</span>) <span class='op'>=&gt;</span> {
-                <span class='kw'>let</span> <span class='ident'>payload_hash</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>hashed_data</span>(<span class='prelude-val'>None</span>) {
-                    <span class='prelude-val'>Ok</span>(<span class='ident'>ph</span>) <span class='op'>=&gt;</span> <span class='ident'>ph</span>,
-                    <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> {
-                        <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>io</span>::<span class='ident'>stderr</span>(), <span class='string'>&quot;{}&quot;</span>, <span class='ident'>e</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unable to write to stderr!&quot;</span>);
-                        <span class='string'>&quot;&quot;</span>.<span class='ident'>to_owned</span>()
-                    }
-                };
-                <span class='kw'>let</span> <span class='ident'>scope_date</span> <span class='op'>=</span> <span class='ident'>UTC</span>.<span class='ident'>datetime_from_str</span>(<span class='ident'>SCOPE_DATE</span>, <span class='ident'>DATE_TIME_FMT</span>)
-                                    .<span class='ident'>expect</span>(<span class='string'>&quot;Unable to parse date!&quot;</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_request_type</span>(<span class='ident'>HttpRequestMethod</span>::<span class='ident'>GET</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_payload_hash</span>(<span class='kw-2'>&amp;</span><span class='ident'>payload_hash</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_date</span>(<span class='ident'>scope_date</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_service</span>(<span class='ident'>Service</span>::<span class='ident'>S3</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_access_key_id</span>(<span class='ident'>ACCESS_KEY_ID</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_secret_access_key</span>(<span class='ident'>SECRET_ACCESS_KEY</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_region</span>(<span class='ident'>Region</span>::<span class='ident'>UsEast1</span>);
-                <span class='ident'>auth</span>.<span class='ident'>add_header</span>(<span class='string'>&quot;HOST&quot;</span>, <span class='ident'>HOST</span>);
-                <span class='ident'>auth</span>.<span class='ident'>add_header</span>(<span class='string'>&quot;x-amz-content-sha256&quot;</span>, <span class='kw-2'>&amp;</span><span class='ident'>payload_hash</span>);
-                <span class='ident'>auth</span>.<span class='ident'>add_header</span>(<span class='string'>&quot;x-amz-date&quot;</span>, <span class='ident'>SCOPE_DATE</span>);
-                <span class='ident'>auth</span>.<span class='ident'>add_header</span>(<span class='string'>&quot;Range&quot;</span>, <span class='string'>&quot;bytes=0-9&quot;</span>);
-
-                <span class='kw'>match</span> <span class='ident'>auth</span>.<span class='ident'>auth_header</span>() {
-                    <span class='prelude-val'>Ok</span>(<span class='ident'>ah</span>) <span class='op'>=&gt;</span> {
-                        <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>io</span>::<span class='ident'>stdout</span>(), <span class='string'>&quot;{}&quot;</span>, <span class='ident'>ah</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unable to write to stdout!&quot;</span>);
-                        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>ah</span> <span class='op'>==</span> <span class='ident'>AWS_TEST_1</span>)
-                    }
-                    <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> {
-                        <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>io</span>::<span class='ident'>stderr</span>(), <span class='string'>&quot;{}&quot;</span>, <span class='ident'>e</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unable to write to stderr!&quot;</span>);
-                        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='boolval'>false</span>);
-                    }
-                }
-            }
-            <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> {
-                <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>io</span>::<span class='ident'>stderr</span>(), <span class='string'>&quot;{}&quot;</span>, <span class='ident'>e</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unable to write to stderr!&quot;</span>);
-                <span class='macro'>assert</span><span class='macro'>!</span>(<span class='boolval'>false</span>);
-            }
-        }
-    }
-
-    <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_put_object</span>() {
-        <span class='kw'>match</span> <span class='ident'>AWSAuth</span>::<span class='ident'>new</span>(<span class='string'>&quot;https://examplebucket.s3.amazonaws.com/test$file.text&quot;</span>) {
-            <span class='prelude-val'>Ok</span>(<span class='kw-2'>mut</span> <span class='ident'>auth</span>) <span class='op'>=&gt;</span> {
-                <span class='kw'>let</span> <span class='ident'>payload_hash</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>hashed_data</span>(<span class='prelude-val'>Some</span>(<span class='string'>&quot;Welcome to Amazon S3.&quot;</span>)) {
-                    <span class='prelude-val'>Ok</span>(<span class='ident'>ph</span>) <span class='op'>=&gt;</span> <span class='ident'>ph</span>,
-                    <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> {
-                        <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>io</span>::<span class='ident'>stderr</span>(), <span class='string'>&quot;{}&quot;</span>, <span class='ident'>e</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unable to write to stderr!&quot;</span>);
-                        <span class='string'>&quot;&quot;</span>.<span class='ident'>to_owned</span>()
-                    }
-                };
-                <span class='kw'>let</span> <span class='ident'>scope_date</span> <span class='op'>=</span> <span class='ident'>UTC</span>.<span class='ident'>datetime_from_str</span>(<span class='ident'>SCOPE_DATE</span>, <span class='ident'>DATE_TIME_FMT</span>)
-                                    .<span class='ident'>expect</span>(<span class='string'>&quot;Unable to parse date!&quot;</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_request_type</span>(<span class='ident'>HttpRequestMethod</span>::<span class='ident'>PUT</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_payload_hash</span>(<span class='kw-2'>&amp;</span><span class='ident'>payload_hash</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_date</span>(<span class='ident'>scope_date</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_service</span>(<span class='ident'>Service</span>::<span class='ident'>S3</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_access_key_id</span>(<span class='ident'>ACCESS_KEY_ID</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_secret_access_key</span>(<span class='ident'>SECRET_ACCESS_KEY</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_region</span>(<span class='ident'>Region</span>::<span class='ident'>UsEast1</span>);
-                <span class='ident'>auth</span>.<span class='ident'>add_header</span>(<span class='string'>&quot;HOST&quot;</span>, <span class='ident'>HOST</span>);
-                <span class='ident'>auth</span>.<span class='ident'>add_header</span>(<span class='string'>&quot;date&quot;</span>, <span class='string'>&quot;Fri, 24 May 2013 00:00:00 GMT&quot;</span>);
-                <span class='ident'>auth</span>.<span class='ident'>add_header</span>(<span class='string'>&quot;x-amz-content-sha256&quot;</span>, <span class='kw-2'>&amp;</span><span class='ident'>payload_hash</span>);
-                <span class='ident'>auth</span>.<span class='ident'>add_header</span>(<span class='string'>&quot;x-amz-storage-class&quot;</span>, <span class='string'>&quot;REDUCED_REDUNDANCY&quot;</span>);
-                <span class='ident'>auth</span>.<span class='ident'>add_header</span>(<span class='string'>&quot;x-amz-date&quot;</span>, <span class='ident'>SCOPE_DATE</span>);
-
-                <span class='kw'>match</span> <span class='ident'>auth</span>.<span class='ident'>auth_header</span>() {
-                    <span class='prelude-val'>Ok</span>(<span class='ident'>ah</span>) <span class='op'>=&gt;</span> {
-                        <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>io</span>::<span class='ident'>stdout</span>(), <span class='string'>&quot;{}&quot;</span>, <span class='ident'>ah</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unable to write to stdout!&quot;</span>);
-                        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>ah</span> <span class='op'>==</span> <span class='ident'>AWS_TEST_2</span>)
-                    }
-                    <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> {
-                        <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>io</span>::<span class='ident'>stderr</span>(), <span class='string'>&quot;{}&quot;</span>, <span class='ident'>e</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unable to write to stderr!&quot;</span>);
-                        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='boolval'>false</span>);
-                    }
-                }
-            }
-            <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> {
-                <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>io</span>::<span class='ident'>stderr</span>(), <span class='string'>&quot;{}&quot;</span>, <span class='ident'>e</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unable to write to stderr!&quot;</span>);
-                <span class='macro'>assert</span><span class='macro'>!</span>(<span class='boolval'>false</span>);
-            }
-        }
-    }
-
-    <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_get_bucket_lifecycle</span>() {
-        <span class='kw'>match</span> <span class='ident'>AWSAuth</span>::<span class='ident'>new</span>(<span class='string'>&quot;https://examplebucket.s3.amazonaws.com/?lifecycle&quot;</span>) {
-            <span class='prelude-val'>Ok</span>(<span class='kw-2'>mut</span> <span class='ident'>auth</span>) <span class='op'>=&gt;</span> {
-                <span class='kw'>let</span> <span class='ident'>payload_hash</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>hashed_data</span>(<span class='prelude-val'>None</span>) {
-                    <span class='prelude-val'>Ok</span>(<span class='ident'>ph</span>) <span class='op'>=&gt;</span> <span class='ident'>ph</span>,
-                    <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> {
-                        <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>io</span>::<span class='ident'>stderr</span>(), <span class='string'>&quot;{}&quot;</span>, <span class='ident'>e</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unable to write to stderr!&quot;</span>);
-                        <span class='string'>&quot;&quot;</span>.<span class='ident'>to_owned</span>()
-                    }
-                };
-                <span class='kw'>let</span> <span class='ident'>scope_date</span> <span class='op'>=</span> <span class='ident'>UTC</span>.<span class='ident'>datetime_from_str</span>(<span class='ident'>SCOPE_DATE</span>, <span class='ident'>DATE_TIME_FMT</span>)
-                                    .<span class='ident'>expect</span>(<span class='string'>&quot;Unable to parse date!&quot;</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_request_type</span>(<span class='ident'>HttpRequestMethod</span>::<span class='ident'>GET</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_payload_hash</span>(<span class='kw-2'>&amp;</span><span class='ident'>payload_hash</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_date</span>(<span class='ident'>scope_date</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_service</span>(<span class='ident'>Service</span>::<span class='ident'>S3</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_access_key_id</span>(<span class='ident'>ACCESS_KEY_ID</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_secret_access_key</span>(<span class='ident'>SECRET_ACCESS_KEY</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_region</span>(<span class='ident'>Region</span>::<span class='ident'>UsEast1</span>);
-                <span class='ident'>auth</span>.<span class='ident'>add_header</span>(<span class='string'>&quot;HOST&quot;</span>, <span class='ident'>HOST</span>);
-                <span class='ident'>auth</span>.<span class='ident'>add_header</span>(<span class='string'>&quot;x-amz-content-sha256&quot;</span>, <span class='kw-2'>&amp;</span><span class='ident'>payload_hash</span>);
-                <span class='ident'>auth</span>.<span class='ident'>add_header</span>(<span class='string'>&quot;x-amz-date&quot;</span>, <span class='ident'>SCOPE_DATE</span>);
-
-                <span class='kw'>match</span> <span class='ident'>auth</span>.<span class='ident'>auth_header</span>() {
-                    <span class='prelude-val'>Ok</span>(<span class='ident'>ah</span>) <span class='op'>=&gt;</span> {
-                        <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>io</span>::<span class='ident'>stdout</span>(), <span class='string'>&quot;{}&quot;</span>, <span class='ident'>ah</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unable to write to stdout!&quot;</span>);
-                        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>ah</span> <span class='op'>==</span> <span class='ident'>AWS_TEST_3</span>)
-                    }
-                    <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> {
-                        <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>io</span>::<span class='ident'>stderr</span>(), <span class='string'>&quot;{}&quot;</span>, <span class='ident'>e</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unable to write to stderr!&quot;</span>);
-                        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='boolval'>false</span>);
-                    }
-                }
-            }
-            <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> {
-                <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>io</span>::<span class='ident'>stderr</span>(), <span class='string'>&quot;{}&quot;</span>, <span class='ident'>e</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unable to write to stderr!&quot;</span>);
-                <span class='macro'>assert</span><span class='macro'>!</span>(<span class='boolval'>false</span>);
-            }
-        }
-    }
-
-    <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_get_bucket_list_objects</span>() {
-        <span class='kw'>match</span> <span class='ident'>AWSAuth</span>::<span class='ident'>new</span>(<span class='string'>&quot;https://examplebucket.s3.amazonaws.com?max-keys=2&amp;prefix=J&quot;</span>) {
-            <span class='prelude-val'>Ok</span>(<span class='kw-2'>mut</span> <span class='ident'>auth</span>) <span class='op'>=&gt;</span> {
-                <span class='kw'>let</span> <span class='ident'>payload_hash</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>hashed_data</span>(<span class='prelude-val'>None</span>) {
-                    <span class='prelude-val'>Ok</span>(<span class='ident'>ph</span>) <span class='op'>=&gt;</span> <span class='ident'>ph</span>,
-                    <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> {
-                        <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>io</span>::<span class='ident'>stderr</span>(), <span class='string'>&quot;{}&quot;</span>, <span class='ident'>e</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unable to write to stderr!&quot;</span>);
-                        <span class='string'>&quot;&quot;</span>.<span class='ident'>to_owned</span>()
-                    }
-                };
-                <span class='kw'>let</span> <span class='ident'>scope_date</span> <span class='op'>=</span> <span class='ident'>UTC</span>.<span class='ident'>datetime_from_str</span>(<span class='ident'>SCOPE_DATE</span>, <span class='ident'>DATE_TIME_FMT</span>)
-                                    .<span class='ident'>expect</span>(<span class='string'>&quot;Unable to parse date!&quot;</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_request_type</span>(<span class='ident'>HttpRequestMethod</span>::<span class='ident'>GET</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_payload_hash</span>(<span class='kw-2'>&amp;</span><span class='ident'>payload_hash</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_date</span>(<span class='ident'>scope_date</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_service</span>(<span class='ident'>Service</span>::<span class='ident'>S3</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_access_key_id</span>(<span class='ident'>ACCESS_KEY_ID</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_secret_access_key</span>(<span class='ident'>SECRET_ACCESS_KEY</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_region</span>(<span class='ident'>Region</span>::<span class='ident'>UsEast1</span>);
-                <span class='ident'>auth</span>.<span class='ident'>add_header</span>(<span class='string'>&quot;HOST&quot;</span>, <span class='ident'>HOST</span>);
-                <span class='ident'>auth</span>.<span class='ident'>add_header</span>(<span class='string'>&quot;x-amz-content-sha256&quot;</span>, <span class='kw-2'>&amp;</span><span class='ident'>payload_hash</span>);
-                <span class='ident'>auth</span>.<span class='ident'>add_header</span>(<span class='string'>&quot;x-amz-date&quot;</span>, <span class='ident'>SCOPE_DATE</span>);
-
-                <span class='kw'>match</span> <span class='ident'>auth</span>.<span class='ident'>auth_header</span>() {
-                    <span class='prelude-val'>Ok</span>(<span class='ident'>ah</span>) <span class='op'>=&gt;</span> {
-                        <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>io</span>::<span class='ident'>stdout</span>(), <span class='string'>&quot;{}&quot;</span>, <span class='ident'>ah</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unable to write to stdout!&quot;</span>);
-                        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>ah</span> <span class='op'>==</span> <span class='ident'>AWS_TEST_4</span>)
-                    }
-                    <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> {
-                        <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>io</span>::<span class='ident'>stderr</span>(), <span class='string'>&quot;{}&quot;</span>, <span class='ident'>e</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unable to write to stderr!&quot;</span>);
-                        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='boolval'>false</span>);
-                    }
-                }
-            }
-            <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> {
-                <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>io</span>::<span class='ident'>stderr</span>(), <span class='string'>&quot;{}&quot;</span>, <span class='ident'>e</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unable to write to stderr!&quot;</span>);
-                <span class='macro'>assert</span><span class='macro'>!</span>(<span class='boolval'>false</span>);
-            }
-        }
-    }
-
-    <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_put_object_chunked</span>() {
-        <span class='kw'>match</span> <span class='ident'>AWSAuth</span>::<span class='ident'>new</span>(<span class='string'>&quot;https://s3.amazonaws.com/examplebucket/chunkObject.txt&quot;</span>) {
-            <span class='prelude-val'>Ok</span>(<span class='kw-2'>mut</span> <span class='ident'>auth</span>) <span class='op'>=&gt;</span> {
-                <span class='kw'>let</span> <span class='ident'>scope_date</span> <span class='op'>=</span> <span class='ident'>UTC</span>.<span class='ident'>datetime_from_str</span>(<span class='ident'>SCOPE_DATE</span>, <span class='ident'>DATE_TIME_FMT</span>)
-                                    .<span class='ident'>expect</span>(<span class='string'>&quot;Unable to parse date!&quot;</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_mode</span>(<span class='ident'>Mode</span>::<span class='ident'>Chunked</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_request_type</span>(<span class='ident'>HttpRequestMethod</span>::<span class='ident'>PUT</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_date</span>(<span class='ident'>scope_date</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_service</span>(<span class='ident'>Service</span>::<span class='ident'>S3</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_access_key_id</span>(<span class='ident'>ACCESS_KEY_ID</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_secret_access_key</span>(<span class='ident'>SECRET_ACCESS_KEY</span>);
-                <span class='ident'>auth</span>.<span class='ident'>set_region</span>(<span class='ident'>Region</span>::<span class='ident'>UsEast1</span>);
-                <span class='ident'>auth</span>.<span class='ident'>add_header</span>(<span class='string'>&quot;HOST&quot;</span>, <span class='string'>&quot;s3.amazonaws.com&quot;</span>);
-                <span class='ident'>auth</span>.<span class='ident'>add_header</span>(<span class='string'>&quot;Content-Encoding&quot;</span>, <span class='string'>&quot;aws-chunked&quot;</span>);
-                <span class='ident'>auth</span>.<span class='ident'>add_header</span>(<span class='string'>&quot;x-amz-content-sha256&quot;</span>, <span class='string'>&quot;STREAMING-AWS4-HMAC-SHA256-PAYLOAD&quot;</span>);
-                <span class='ident'>auth</span>.<span class='ident'>add_header</span>(<span class='string'>&quot;x-amz-storage-class&quot;</span>, <span class='string'>&quot;REDUCED_REDUNDANCY&quot;</span>);
-                <span class='ident'>auth</span>.<span class='ident'>add_header</span>(<span class='string'>&quot;x-amz-date&quot;</span>, <span class='ident'>SCOPE_DATE</span>);
-                <span class='ident'>auth</span>.<span class='ident'>add_header</span>(<span class='string'>&quot;x-amz-decoded-content-length&quot;</span>, <span class='string'>&quot;66560&quot;</span>);
-                <span class='ident'>auth</span>.<span class='ident'>add_header</span>(<span class='string'>&quot;Content-Length&quot;</span>, <span class='string'>&quot;66824&quot;</span>);
-
-                <span class='kw'>match</span> <span class='ident'>auth</span>.<span class='ident'>auth_header</span>() {
-                    <span class='prelude-val'>Ok</span>(<span class='ident'>ah</span>) <span class='op'>=&gt;</span> {
-                        <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>io</span>::<span class='ident'>stdout</span>(), <span class='string'>&quot;{}&quot;</span>, <span class='ident'>ah</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unable to write to stdout!&quot;</span>);
-                        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='ident'>ah</span>.<span class='ident'>is_empty</span>())
-                    }
-                    <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> {
-                        <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>io</span>::<span class='ident'>stderr</span>(), <span class='string'>&quot;{}&quot;</span>, <span class='ident'>e</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unable to write to stderr!&quot;</span>);
-                        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='boolval'>false</span>);
-                    }
-                }
-            }
-            <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> {
-                <span class='macro'>writeln</span><span class='macro'>!</span>(<span class='ident'>io</span>::<span class='ident'>stderr</span>(), <span class='string'>&quot;{}&quot;</span>, <span class='ident'>e</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Unable to write to stderr!&quot;</span>);
-                <span class='macro'>assert</span><span class='macro'>!</span>(<span class='boolval'>false</span>);
-            }
-        }
     }
 }
 </pre>
