@@ -11,18 +11,18 @@ repository = "https://github.com/rustyhorde/warheadhateus"
 version = "0.1.1-pre"
 
 [dependencies]
-chrono = "0.2.19"
-log = "0.3.5"
-rustc-serialize = "0.3.18"
-sodium-sys = "0.0.4"
-urlparse = "0.7.3"
+chrono = "~0.2.19"
+log = "~0.3.5"
+rustc-serialize = "~0.3.18"
+sodium-sys = "~0.0.4"
+urlparse = "~0.7.3"
 
 [dependencies.clippy]
 optional = true
-version = "0.0.43"
+version = "~0.0.43"
 
 [dev-dependencies]
-env_logger = "0.3.2"
+env_logger = "~0.3.2"
 
 [features]
 lint = ["clippy"]

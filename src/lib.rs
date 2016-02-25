@@ -6,7 +6,7 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
-//! AWS Authorization Header Generation (AWS Signature Version 4)
+//! AWS Signature Generation (AWS Signature Version 4 & Version 2)
 //!
 //! After setting up the AWSAuth struct, calling `auth_header` will return a String similar to the
 //! following:
@@ -91,6 +91,7 @@ mod error;
 mod mode;
 mod region;
 mod service;
+mod types;
 mod utils;
 
 use chrono::{DateTime, UTC};
@@ -103,6 +104,7 @@ use sodium_sys::crypto::utils::init;
 use std::collections::HashMap;
 use std::fmt;
 use std::sync::{ONCE_INIT, Once};
+use types::SigningVersion;
 use urlparse::{quote, urlparse};
 pub use utils::hashed_data;
 
@@ -134,6 +136,7 @@ pub struct AWSAuth {
     sam: SAM,
     secret_access_key: String,
     service: Service,
+    version: SigningVersion,
 }
 
 impl Default for AWSAuth {
@@ -152,6 +155,7 @@ impl Default for AWSAuth {
             sam: SAM::AWS4HMACSHA256,
             secret_access_key: String::new(),
             service: Service::S3,
+            version: SigningVersion::Four,
         }
     }
 }
