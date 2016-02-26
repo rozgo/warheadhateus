@@ -20,26 +20,38 @@ const AWS_TEST_1: &'static str = "AWS4-HMAC-SHA256 \
                                   x-amz-date,\
                                   Signature=f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd9\
                                   1039c6036bdb41";
+const AWS_TEST_2: &'static str = "X-Amz-Algorithm=AWS4-HMAC-SHA256\
+                                  &X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20130524%2Fus-east-1%2F\
+                                  s3%2Faws4_request\
+                                  &X-Amz-Date=20130524T000000Z\
+                                  &X-Amz-SignedHeaders=host%3Brange%3Bx-amz-content-sha256%3B\
+                                  x-amz-date\
+                                  &X-Amz-Signature=f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48d\
+                                  d91039c6036bdb41";
 
 fn run() -> Result<(), AWSAuthError> {
     let mut auth = try!(AWSAuth::new(URL_1));
     let payload_hash = try!(hashed_data(None));
     let scope_date = try!(UTC.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT));
-    auth.set_request_type(HttpRequestMethod::GET);
-    auth.set_payload_hash(&payload_hash);
-    auth.set_date(scope_date);
-    auth.set_service(Service::S3);
-    auth.set_access_key_id(ACCESS_KEY_ID);
-    auth.set_secret_access_key(SECRET_ACCESS_KEY);
-    auth.set_region(Region::UsEast1);
-    auth.add_header("HOST", HOST);
-    auth.add_header("x-amz-content-sha256", &payload_hash);
-    auth.add_header("x-amz-date", SCOPE_DATE);
-    auth.add_header("Range", "bytes=0-9");
+    auth.set_request_type(HttpRequestMethod::GET)
+        .set_payload_hash(&payload_hash)
+        .set_date(scope_date)
+        .set_service(Service::S3)
+        .set_access_key_id(ACCESS_KEY_ID)
+        .set_secret_access_key(SECRET_ACCESS_KEY)
+        .set_region(Region::UsEast1)
+        .add_header("HOST", HOST)
+        .add_header("x-amz-content-sha256", &payload_hash)
+        .add_header("x-amz-date", SCOPE_DATE)
+        .add_header("Range", "bytes=0-9");
 
     let ah = try!(auth.auth_header());
-    assert!(ah == AWS_TEST_1);
     writeln!(io::stdout(), "\x1b[32;1m{}\x1b[0m{}", "Authorization: ", ah).expect(EX_STDOUT);
+    assert!(ah == AWS_TEST_1);
+
+    let qs = try!(auth.query_string());
+    writeln!(io::stdout(), "\x1b[32;1m{}\x1b[0m{}", "Query String: ", qs).expect(EX_STDOUT);
+    assert!(qs == AWS_TEST_2);
 
     Ok(())
 }

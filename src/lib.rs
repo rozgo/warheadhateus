@@ -8,81 +8,95 @@
 
 //! AWS Signature Generation (AWS Signature Version 4 & Version 2)
 //!
-//! After setting up the AWSAuth struct for Signing Version 4, calling `auth_header` will return a
-//! String similar to the following:
+//! ## AWS Signature Version 4
+//! The [Signature Version 4][1] signing process describes how to add authentication information to
+//! AWS requests.  This library provides the ability to generate the `auth_header` version or the
+//! `query_string` version of v4 signatures.
 //!
-//! ```text
-//! AWS4-HMAC-SHA256 Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request,\
-//! SignedHeaders=host;range;x-amz-content-sha256;x-amz-date,\
-//! Signature=f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd91039c6036bdb41
-//! ```
+//! ## AWS Signature Version 2
+//! Some AWS Query APIs don't support v4 signatures yet.  You should use [Signature Version 2][2] in
+//! these cases.  When configured to use version 2, the library provides the ability to generate the
+//! `signature` for v2.
 //!
-//! After setting up the AWSAuth struct for Signing Version 2, calling `signature` will return a
-//! String similar to the following:
-//!
-//! ```text
-//! nBK3UpU7ZLgX7a9p59bB2MZtCW5%2BEI%2BzU%2BvicELXhhQ%3D
-//! ```
-//!
-//! Currently this is implemented for S3 single and multi chunk mode and passes all tests.
-//!
-//! * [Single Chunk][1]
-//! * [Multiple Chunks][2]
-//!
-//! [1]: http://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
-//! [2]: http://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-streaming.html
-//!
-//! # Examples
-//!
-//! ## Amazon S3 Single Chunk Mode
+//! ## Examples
+//! ### v4 Authorization Header
+//! The String generated here would be sent with the actual request in the `Authorization` header.
 //!
 //! ```
-//! # #[macro_use] extern crate log;
 //! # extern crate chrono;
+//! # extern crate env_logger;
 //! # extern crate warheadhateus;
-//! #
-//! # use chrono::UTC;
-//! # use chrono::offset::TimeZone;
-//! # use std::error::Error;
-//! # use std::io::{self, Write};
-//! # use warheadhateus::{AWSAuth, hashed_data, HttpRequestMethod, Region, Service};
-//! #
-//! # const DATE_TIME_FMT: &'static str = "%Y%m%dT%H%M%SZ";
-//! # const SCOPE_DATE: &'static str = "20130524T000000Z";
-//! # const ACCESS_KEY_ID: &'static str = "AKIAIOSFODNN7EXAMPLE";
-//! # const SECRET_ACCESS_KEY: &'static str = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY";
-//! # const HOST: &'static str = "examplebucket.s3.amazonaws.com";
-//! # const URL_1: &'static str = "https://examplebucket.s3.amazonaws.com/test.txt";
-//! # const AWS_TEST_1: &'static str = "AWS4-HMAC-SHA256 \
-//! # Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request,\
-//! # SignedHeaders=host;range;x-amz-content-sha256;x-amz-date,\
-//! # Signature=f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd91039c6036bdb41";
-//! #
-//! # fn fail<T>(e: T) -> ! where T: Error {
-//! #     writeln!(io::stderr(), "{}", e).expect("Unable to write to stderr!");
-//! #     panic!();
-//! # }
-//! #
-//! # fn main() {
-//! let mut auth = AWSAuth::new(URL_1).unwrap_or_else(|e| fail(e));
-//! let payload_hash = hashed_data(None).unwrap_or_else(|e| fail(e));
-//! let scope_date = UTC.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT).unwrap_or_else(|e| fail(e));
-//! auth.set_request_type(HttpRequestMethod::GET);
-//! auth.set_payload_hash(&payload_hash);
-//! auth.set_date(scope_date);
-//! auth.set_service(Service::S3);
-//! auth.set_access_key_id(ACCESS_KEY_ID);
-//! auth.set_secret_access_key(SECRET_ACCESS_KEY);
-//! auth.set_region(Region::UsEast1);
-//! auth.add_header("HOST", HOST);
-//! auth.add_header("x-amz-content-sha256", &payload_hash);
-//! auth.add_header("x-amz-date", SCOPE_DATE);
-//! auth.add_header("Range", "bytes=0-9");
 //!
-//! let ah = auth.auth_header().unwrap_or_else(|e| fail(e));
-//! assert!(ah == AWS_TEST_1);
+//! # fn main() {
+//! use chrono::UTC;
+//! use chrono::offset::TimeZone;
+//! use std::io::{self, Write};
+//! use warheadhateus::{AWSAuth, AWSAuthError, hashed_data, HttpRequestMethod, Region, Service};
+//!
+//! const EX_STDOUT: &'static str = "Unable to write to stdout!";
+//! const ACCESS_KEY_ID: &'static str = "AKIAIOSFODNN7EXAMPLE";
+//! const DATE_TIME_FMT: &'static str = "%Y%m%dT%H%M%SZ";
+//! const HOST: &'static str = "examplebucket.s3.amazonaws.com";
+//! const SCOPE_DATE: &'static str = "20130524T000000Z";
+//! const SECRET_ACCESS_KEY: &'static str = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY";
+//! const URL_1: &'static str = "https://examplebucket.s3.amazonaws.com/test.txt";
+//! const AWS_TEST_1: &'static str = "AWS4-HMAC-SHA256 \
+//!             Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request,\
+//!             SignedHeaders=host;range;x-amz-content-sha256;x-amz-date,\
+//!             Signature=f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd91039c6036bdb41";
+//!
+//! fn run() -> Result<(), AWSAuthError> {
+//!     let mut auth = try!(AWSAuth::new(URL_1));
+//!     let payload_hash = try!(hashed_data(None));
+//!     let scope_date = try!(UTC.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT));
+//!     auth.set_request_type(HttpRequestMethod::GET);
+//!     auth.set_payload_hash(&payload_hash);
+//!     auth.set_date(scope_date);
+//!     auth.set_service(Service::S3);
+//!     auth.set_access_key_id(ACCESS_KEY_ID);
+//!     auth.set_secret_access_key(SECRET_ACCESS_KEY);
+//!     auth.set_region(Region::UsEast1);
+//!     auth.add_header("HOST", HOST);
+//!     auth.add_header("x-amz-content-sha256", &payload_hash);
+//!     auth.add_header("x-amz-date", SCOPE_DATE);
+//!     auth.add_header("Range", "bytes=0-9");
+//!
+//!     let ah = try!(auth.auth_header());
+//!     assert!(ah == AWS_TEST_1);
+//!     writeln!(io::stdout(), "\x1b[32;1m{}\x1b[0m{}", "Authorization: ", ah).expect(EX_STDOUT);
+//!
+//!     Ok(())
+//! }
+//!
+//! env_logger::init().expect("Failed to initialize logging!");
+//! run().expect("Failed to generate Authorization header!");
 //! # }
 //! ```
+//!
+//! ### v4 Query String
+//!
+//! ### v2 Signature
+//!
+//! ## Special Modes
+//! AWS S3 Chunked (or Streaming) mode is handled a bit differently than a normal signing request.
+//! See [Streaming SIG4][3] for Amazon docs or `s3_multi.rs` in the examples directory, but the gist
+//! is:
+//!
+//! 1. Calculate the total content length based on the payload size. Use the `content_length`
+//! function to get this value.
+//! 2. Create a seed signature from the headers.  Use the `seed_signature` function after setting
+//! the `seed` flag to true.
+//! 3. For each chunk, generate a chunk signature.  Use the `chunk_signature` function to do this.
+//! In the case of the first chunk, use the `seed_signature` as the `previous_signature` value.
+//! 4. Generate the chunk body after the signature. This is what will be streamed.  Use the
+//! `chunk_body` function to do this.
+//! 5. After the last chunk with data is created, generate a chunk signature and chunk body for a
+//! 0-byte payload.  This will be the last chunk streamed, and signals the end of your payload.
+//!
+//! [1]: http://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
+//! [2]: http://docs.aws.amazon.com/general/latest/gr/signature-version-2.html
+//! [3]: http://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-streaming.html
+//!
 #![cfg_attr(feature = "clippy", feature(plugin))]
 #![cfg_attr(feature = "clippy", plugin(clippy))]
 #![cfg_attr(feature = "clippy", deny(clippy, clippy_pedantic))]
@@ -670,7 +684,7 @@ impl AWSAuth {
         }
     }
 
-    /// Create the AWS S3 Authorization HTTP header.
+    /// Create the AWS Authorization HTTP header.
     ///
     /// # Examples
     ///
@@ -700,6 +714,45 @@ impl AWSAuth {
                    self.credential(),
                    self.signed_headers(),
                    signature))
+    }
+
+    /// Create the AWS Authorization Query String.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::io::{self, Write};
+    /// use warheadhateus::AWSAuth;
+    ///
+    /// match AWSAuth::new("https://s3.amazonaws.com/examplebucket/test.txt") {
+    ///     Ok(mut auth) => {
+    ///         if let Ok(qs) = auth.query_string() {
+    ///             writeln!(io::stdout(), "{}", qs).expect("Unable to write to stdout!");
+    ///         }
+    ///     }
+    ///     Err(_) => {
+    ///         // Failure
+    ///     }
+    /// }
+    /// ```
+    pub fn query_string(&self) -> AWSAuthResult {
+        init();
+        match (&self.version, &self.mode) {
+            (&SigningVersion::Four, &Mode::Normal) => {
+                let fmtdate = self.date.format(DATE_TIME_FMT).to_string();
+                Ok(format!("X-Amz-Algorithm={}\
+                           &X-Amz-Credential={}\
+                           &X-Amz-Date={}\
+                           &X-Amz-SignedHeaders={}\
+                           &X-Amz-Signature={}",
+                           self.sam,
+                           try!(quote(self.credential(), b"")),
+                           fmtdate,
+                           try!(quote(self.signed_headers(), b"")),
+                           try!(self.signature())))
+            }
+            _ => Err(AWSAuthError::ModeError),
+        }
     }
 
     /// Generate the seed signature for chunked mode.
