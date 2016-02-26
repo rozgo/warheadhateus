@@ -1,9 +1,11 @@
 extern crate chrono;
+extern crate clap;
 extern crate env_logger;
 extern crate regex;
 extern crate warheadhateus;
 
-use chrono::{Duration, UTC};
+use chrono::UTC;
+use clap::{Arg, App};
 use regex::Regex;
 use std::env;
 use std::fs::File;
@@ -39,22 +41,20 @@ fn credentials() -> Result<(String, String), io::Error> {
     Ok((ak, sk))
 }
 
-fn run() -> Result<(), AWSAuthError> {
+fn run(token: &str) -> Result<(), AWSAuthError> {
     let date = UTC::now();
-    let soon = match date.checked_add(Duration::seconds(60)) {
-        Some(s) => s,
-        None => date,
-    };
-    let fmtdate = soon.format(DATE_TIME_FMT).to_string();
+    let fmtdate = date.format(DATE_TIME_FMT).to_string();
     if let Ok((access_key, secret_key)) = credentials() {
         let mut url = format!("https://sts.amazonaws.com\
                           ?Action=GetSessionToken\
                           &Version=2011-06-15\
                           &DurationSeconds=3600\
+                          &SerialNumber=arn:aws:iam::184438746295:mfa/jozias\
+                          &TokenCode={}\
                           &AWSAccessKeyId={}\
                           &SignatureVersion=2\
                           &SignatureMethod=HmacSHA256\
-                          &Timestamp={}", access_key, fmtdate);
+                          &Timestamp={}", token, access_key, fmtdate);
         let mut auth = try!(AWSAuth::new(&url));
         auth.set_version(SigningVersion::Two);
         auth.set_request_type(HttpRequestMethod::GET);
@@ -72,5 +72,17 @@ fn run() -> Result<(), AWSAuthError> {
 
 fn main() {
     env_logger::init().expect("Failed to initialize logging!");
-    run().expect("Failed to chunk request!");
+    let matches = App::new("sts")
+                          .version("1.0")
+                          .author("Jason Ozias <jason.g.ozias@gmail.com>")
+                          .about("Run an AWS STS Request")
+                          .arg(Arg::with_name("token")
+                               .short("t")
+                               .long("token")
+                               .value_name("TOKEN")
+                               .help("Sets a token code from an authenticator")
+                               .takes_value(true))
+                          .get_matches();
+    let token = matches.value_of("token").unwrap_or("123456");
+    run(token).expect("Failed to chunk request!");
 }
