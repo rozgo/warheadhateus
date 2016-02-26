@@ -8,13 +8,20 @@
 
 //! AWS Signature Generation (AWS Signature Version 4 & Version 2)
 //!
-//! After setting up the AWSAuth struct, calling `auth_header` will return a String similar to the
-//! following:
+//! After setting up the AWSAuth struct for Signing Version 4, calling `auth_header` will return a
+//! String similar to the following:
 //!
 //! ```text
 //! AWS4-HMAC-SHA256 Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request,\
 //! SignedHeaders=host;range;x-amz-content-sha256;x-amz-date,\
 //! Signature=f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd91039c6036bdb41
+//! ```
+//!
+//! After setting up the AWSAuth struct for Signing Version 2, calling `signature` will return a
+//! String similar to the following:
+//!
+//! ```text
+//! nBK3UpU7ZLgX7a9p59bB2MZtCW5%2BEI%2BzU%2BvicELXhhQ%3D
 //! ```
 //!
 //! Currently this is implemented for S3 single and multi chunk mode and passes all tests.
