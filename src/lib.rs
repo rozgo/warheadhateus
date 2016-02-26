@@ -88,23 +88,18 @@ extern crate sodium_sys;
 extern crate urlparse;
 
 mod error;
-mod mode;
-mod region;
-mod service;
 mod types;
 mod utils;
 
 use chrono::{DateTime, UTC};
 pub use error::AWSAuthError;
-pub use mode::Mode;
-pub use region::Region;
+use rustc_serialize::base64::{STANDARD, ToBase64};
 use rustc_serialize::hex::ToHex;
-pub use service::Service;
 use sodium_sys::crypto::utils::init;
 use std::collections::HashMap;
 use std::fmt;
 use std::sync::{ONCE_INIT, Once};
-use types::SigningVersion;
+pub use types::{Mode, Region, Service, SigningVersion};
 use urlparse::{quote, urlparse};
 pub use utils::hashed_data;
 
@@ -127,6 +122,7 @@ pub struct AWSAuth {
     chunk_size: usize,
     date: DateTime<UTC>,
     headers: HashMap<String, String>,
+    host: String,
     mode: Mode,
     path: String,
     payload_hash: String,
@@ -135,6 +131,7 @@ pub struct AWSAuth {
     req_type: HttpRequestMethod,
     sam: SAM,
     secret_access_key: String,
+    seed: bool,
     service: Service,
     version: SigningVersion,
 }
@@ -146,6 +143,7 @@ impl Default for AWSAuth {
             chunk_size: 0,
             date: UTC::now(),
             headers: HashMap::new(),
+            host: String::new(),
             mode: Mode::Normal,
             path: String::new(),
             payload_hash: String::new(),
@@ -154,6 +152,7 @@ impl Default for AWSAuth {
             req_type: HttpRequestMethod::GET,
             sam: SAM::AWS4HMACSHA256,
             secret_access_key: String::new(),
+            seed: false,
             service: Service::S3,
             version: SigningVersion::Four,
         }
@@ -183,6 +182,10 @@ impl AWSAuth {
     pub fn new(url: &str) -> Result<AWSAuth, AWSAuthError> {
         let parsed = urlparse(url);
         let mut auth = AWSAuth { path: parsed.path, ..Default::default() };
+
+        if let Some(h) = parsed.hostname {
+            auth.host = h;
+        }
 
         if let Some(q) = parsed.query {
             auth.query = q;
@@ -425,6 +428,27 @@ impl AWSAuth {
         self
     }
 
+    /// Set the seed flag.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use warheadhateus::AWSAuth;
+    ///
+    /// match AWSAuth::new("https://s3.amazonaws.com/examplebucket/test.txt") {
+    ///     Ok(mut auth) => {
+    ///         auth.set_seed(true);
+    ///     }
+    ///     Err(_) => {
+    ///         // Failure
+    ///     }
+    /// }
+    /// ```
+    pub fn set_seed(&mut self, seed: bool) -> &mut AWSAuth {
+        self.seed = seed;
+        self
+    }
+
     /// Set the AWS services this request should be constructed for (i.e. S3)
     ///
     /// # Examples
@@ -443,6 +467,27 @@ impl AWSAuth {
     /// ```
     pub fn set_service(&mut self, service: Service) -> &mut AWSAuth {
         self.service = service;
+        self
+    }
+
+    /// Set the Signing Version (2 or 4)
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use warheadhateus::{AWSAuth, SigningVersion};
+    ///
+    /// match AWSAuth::new("https://s3.amazonaws.com/examplebucket/test.txt") {
+    ///     Ok(mut auth) => {
+    ///         auth.set_version(SigningVersion::Two);
+    ///     }
+    ///     Err(_) => {
+    ///         // Failure
+    ///     }
+    /// }
+    /// ```
+    pub fn set_version(&mut self, version: SigningVersion) -> &mut AWSAuth {
+        self.version = version;
         self
     }
 
@@ -553,8 +598,23 @@ impl AWSAuth {
         Ok(signature.to_hex())
     }
 
-    fn signature(&self, seed: bool) -> AWSAuthResult {
-        let hash = if seed {
+    fn v2(&self) -> AWSAuthResult {
+        let string_to_sign = format!("{}\n{}\n{}\n{}",
+                                     self.req_type,
+                                     self.host,
+                                     try!(self.canonical_uri()),
+                                     try!(self.canonical_query_string()));
+        debug!("V2: StringToSign\n{}", string_to_sign);
+        let key = &self.secret_access_key;
+        let signature = try!(utils::signed_data(string_to_sign.as_bytes(), key.as_bytes()));
+        let encoded_sig = try!(quote(signature.to_base64(STANDARD), b""));
+        debug!("V2: Signature\n{}", encoded_sig);
+
+        Ok(encoded_sig)
+    }
+
+    fn v4(&self) -> AWSAuthResult {
+        let hash = if self.seed {
             "STREAMING-AWS4-HMAC-SHA256-PAYLOAD"
         } else {
             &self.payload_hash[..]
@@ -566,15 +626,41 @@ impl AWSAuth {
                                         self.canonical_headers(),
                                         self.signed_headers(),
                                         hash);
-        debug!("CanonicalRequest\n{}", canonical_request);
+        debug!("V4: CanonicalRequest\n{}", canonical_request);
         let string_to_sign = format!("{}\n{}\n{}\n{}",
                                      self.sam,
                                      self.date.format(DATE_TIME_FMT),
                                      self.scope(),
                                      try!(utils::hashed_data(Some(canonical_request.as_bytes()))));
-        debug!("StringToSign\n{}", string_to_sign);
+        debug!("V4: StringToSign\n{}", string_to_sign);
 
         self.sign_string(&string_to_sign)
+    }
+
+    /// Generate the signature.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::io::{self, Write};
+    /// use warheadhateus::AWSAuth;
+    ///
+    /// match AWSAuth::new("https://s3.amazonaws.com/examplebucket/test.txt") {
+    ///     Ok(mut auth) => {
+    ///         if let Ok(sig) = auth.signature() {
+    ///             writeln!(io::stdout(), "{}", sig).expect("Unable to write to stdout!");
+    ///         }
+    ///     }
+    ///     Err(_) => {
+    ///         // Failure
+    ///     }
+    /// }
+    /// ```
+    pub fn signature(&self) -> AWSAuthResult {
+        match self.version {
+            SigningVersion::Two => self.v2(),
+            SigningVersion::Four => self.v4(),
+        }
     }
 
     /// Create the AWS S3 Authorization HTTP header.
@@ -599,8 +685,8 @@ impl AWSAuth {
     pub fn auth_header(&self) -> AWSAuthResult {
         init();
         let signature = match self.mode {
-            Mode::Normal => try!(self.signature(false)),
-            Mode::Chunked => try!(self.signature(true)),
+            Mode::Normal => try!(self.signature()),
+            Mode::Chunked => try!(self.seed_signature()),
         };
         Ok(format!("{} Credential={},SignedHeaders={},Signature={}",
                    self.sam,
@@ -620,6 +706,7 @@ impl AWSAuth {
     /// match AWSAuth::new("https://s3.amazonaws.com/examplebucket/test.txt") {
     ///     Ok(mut auth) => {
     ///         auth.set_mode(Mode::Chunked);
+    ///         auth.set_seed(true);
     ///         auth.set_chunk_size(65536);
     ///         if let Ok(ss) = auth.seed_signature() {
     ///             writeln!(io::stdout(), "{}", ss).expect("Unable to write to stdout!");
@@ -631,8 +718,8 @@ impl AWSAuth {
     /// }
     /// ```
     pub fn seed_signature(&self) -> AWSAuthResult {
-        match self.mode {
-            Mode::Chunked => Ok(try!(self.signature(true))),
+        match (self.seed, &self.mode) {
+            (true, &Mode::Chunked) => Ok(try!(self.signature())),
             _ => Err(AWSAuthError::ModeError),
         }
     }

@@ -56,14 +56,16 @@ fn test_content_length() {
 
 #[test]
 fn test_auth_header() {
-    let auth = get_auth().unwrap_or_else(|e| fail(e));
+    let mut auth = get_auth().unwrap_or_else(|e| fail(e));
+    auth.set_seed(true);
     let ah = auth.auth_header().unwrap_or_else(|e| fail(e));
     assert!(ah == AWS_TEST_5);
 }
 
 #[test]
 fn test_seed_signature() {
-    let auth = get_auth().unwrap_or_else(|e| fail(e));
+    let mut auth = get_auth().unwrap_or_else(|e| fail(e));
+    auth.set_seed(true);
     let ss = auth.seed_signature().unwrap_or_else(|e| fail(e));
     assert!(ss == SEED_SIG);
 }

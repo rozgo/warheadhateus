@@ -9,21 +9,24 @@ use std::string::FromUtf8Error;
 pub enum AWSAuthError {
     /// Error thrown converting from UTF-8.
     FromUtf8Error(FromUtf8Error),
-    /// Error thrown during sodium operations.
-    Nacl(sodium_sys::SSError),
-    /// Error thrown parsing a datetime.
-    ParseError(chrono::ParseError),
     /// Error thrown when running methods not valid for the current mode.
     ModeError,
+    /// Error thrown during sodium operations.
+    Nacl(sodium_sys::SSError),
+    /// General error thrown during operation.
+    Other(&'static str),
+    /// Error thrown parsing a datetime.
+    ParseError(chrono::ParseError),
 }
 
 impl Error for AWSAuthError {
     fn description(&self) -> &str {
         match *self {
             AWSAuthError::FromUtf8Error(ref e) => e.description(),
-            AWSAuthError::Nacl(_) => "Sodium SSError",
-            AWSAuthError::ParseError(ref e) => e.description(),
             AWSAuthError::ModeError => "ModeError",
+            AWSAuthError::Nacl(_) => "Sodium SSError",
+            AWSAuthError::Other(e) => e,
+            AWSAuthError::ParseError(ref e) => e.description(),
         }
     }
 }
@@ -32,9 +35,10 @@ impl fmt::Display for AWSAuthError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let display = match *self {
             AWSAuthError::FromUtf8Error(_) => "FromUtf8Error",
-            AWSAuthError::Nacl(_) => "SSError",
-            AWSAuthError::ParseError(_) => "ParseError",
             AWSAuthError::ModeError => "ModeError",
+            AWSAuthError::Nacl(_) => "SSError",
+            AWSAuthError::Other(e) => e,
+            AWSAuthError::ParseError(_) => "ParseError",
         };
         write!(f, "{}", display)
     }

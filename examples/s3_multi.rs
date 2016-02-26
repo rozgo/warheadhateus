@@ -73,6 +73,7 @@ fn run() -> Result<(), AWSAuthError> {
     auth.set_secret_access_key(SECRET_ACCESS_KEY);
     auth.set_region(Region::UsEast1);
     auth.set_chunk_size(chunk_size);
+    auth.set_seed(true);
     auth.add_header("Host", HOST);
     auth.add_header("Content-Encoding", "aws-chunked");
     auth.add_header("x-amz-content-sha256", "STREAMING-AWS4-HMAC-SHA256-PAYLOAD");
@@ -90,6 +91,7 @@ fn run() -> Result<(), AWSAuthError> {
     let ss = try!(auth.seed_signature());
     oc.hl("Seed Signature", &ss);
     auth.set_sam(SAM::AWS4HMACSHA256PAYLOAD);
+    auth.set_seed(false);
 
     // Previous Signature, initialized to seed signature.
     let mut ps = ss;

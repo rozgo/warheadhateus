@@ -2,6 +2,7 @@ extern crate chrono;
 extern crate warheadhateus;
 
 mod s3;
+mod v2;
 
 use std::error::Error;
 use std::io::{self, Write};
