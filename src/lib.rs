@@ -112,17 +112,19 @@ mod error;
 mod types;
 mod utils;
 
+// Re-exports
+pub use error::{AWSAuthError, ParseRegionError, ParseServiceError};
+pub use types::{Mode, Region, Service, SigningVersion};
+pub use utils::{hashed_data, signed_data};
+
 use chrono::{DateTime, UTC};
-pub use error::AWSAuthError;
 use rustc_serialize::base64::{STANDARD, ToBase64};
 use rustc_serialize::hex::ToHex;
 use sodium_sys::crypto::utils::init;
 use std::collections::HashMap;
 use std::fmt;
 use std::sync::{ONCE_INIT, Once};
-pub use types::{Mode, Region, Service, SigningVersion};
 use urlparse::{quote, urlparse};
-pub use utils::hashed_data;
 
 const AWS4_REQUEST: &'static str = "aws4_request";
 const DATE_FMT: &'static str = "%Y%m%d";

@@ -21,6 +21,7 @@ pub fn hashed_data(data: Option<&[u8]>) -> Result<String, AWSAuthError> {
     Ok(hash.to_hex())
 }
 
+/// Sign the given data with the given key (HMAC-SHA256).
 pub fn signed_data(data: &[u8], key: &[u8]) -> Result<Vec<u8>, AWSAuthError> {
     ::init();
     let state_size = hmacsha2::statebytes(SHA256);
