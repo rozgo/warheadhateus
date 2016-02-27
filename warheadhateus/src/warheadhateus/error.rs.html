@@ -134,6 +134,8 @@
 <span id="91">91</span>
 <span id="92">92</span>
 <span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>chrono</span>;
 <span class='kw'>use</span> <span class='ident'>sodium_sys</span>;
@@ -200,6 +202,7 @@
 }
 
 <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>,<span class='ident'>PartialEq</span>)]</span>
+<span class='doccomment'>/// Thrown when a given region cannot be parsed.</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>ParseRegionError</span>;
 
 <span class='kw'>impl</span> <span class='ident'>Error</span> <span class='kw'>for</span> <span class='ident'>ParseRegionError</span> {
@@ -215,6 +218,7 @@
 }
 
 <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>,<span class='ident'>PartialEq</span>)]</span>
+<span class='doccomment'>/// Thrown when a given service cannot be parsed.</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>ParseServiceError</span>;
 
 <span class='kw'>impl</span> <span class='ident'>Error</span> <span class='kw'>for</span> <span class='ident'>ParseServiceError</span> {

@@ -46,7 +46,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-0' class='srclink' href='../src/warheadhateus/lib.rs.html#9-992' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-0' class='srclink' href='../src/warheadhateus/lib.rs.html#9-994' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>AWS Signature Generation (AWS Signature Version 4 &amp; Version 2)</p>
 
 <h2 id='aws-signature-version-4' class='section-header'><a href='#aws-signature-version-4'>AWS Signature Version 4</a></h2>
@@ -136,6 +136,24 @@ In the case of the first chunk, use the <code>seed_signature</code> as the <code
 
                         </td>
                     </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.ParseRegionError.html'
+                               title='warheadhateus::ParseRegionError'>ParseRegionError</a></td>
+                        <td class='docblock short'>
+                             <p>Thrown when a given region cannot be parsed.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.ParseServiceError.html'
+                               title='warheadhateus::ParseServiceError'>ParseServiceError</a></td>
+                        <td class='docblock short'>
+                             <p>Thrown when a given service cannot be parsed.</p>
+
+                        </td>
+                    </tr>
                 </table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
 <table>
                     <tr class=' module-item'>
@@ -207,6 +225,15 @@ In the case of the first chunk, use the <code>seed_signature</code> as the <code
                                title='warheadhateus::hashed_data'>hashed_data</a></td>
                         <td class='docblock short'>
                              <p>Hash the given data (or an empty string) with SHA256.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.signed_data.html'
+                               title='warheadhateus::signed_data'>signed_data</a></td>
+                        <td class='docblock short'>
+                             <p>Sign the given data with the given key (HMAC-SHA256).</p>
 
                         </td>
                     </tr>

@@ -1033,6 +1033,8 @@
 <span id="990">990</span>
 <span id="991">991</span>
 <span id="992">992</span>
+<span id="993">993</span>
+<span id="994">994</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright (c) 2016 warheadhateus developers</span>
 <span class='comment'>//</span>
@@ -1148,17 +1150,19 @@
 <span class='kw'>mod</span> <span class='ident'>types</span>;
 <span class='kw'>mod</span> <span class='ident'>utils</span>;
 
+<span class='comment'>// Re-exports</span>
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>error</span>::{<span class='ident'>AWSAuthError</span>, <span class='ident'>ParseRegionError</span>, <span class='ident'>ParseServiceError</span>};
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>types</span>::{<span class='ident'>Mode</span>, <span class='ident'>Region</span>, <span class='ident'>Service</span>, <span class='ident'>SigningVersion</span>};
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>utils</span>::{<span class='ident'>hashed_data</span>, <span class='ident'>signed_data</span>};
+
 <span class='kw'>use</span> <span class='ident'>chrono</span>::{<span class='ident'>DateTime</span>, <span class='ident'>UTC</span>};
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>error</span>::<span class='ident'>AWSAuthError</span>;
 <span class='kw'>use</span> <span class='ident'>rustc_serialize</span>::<span class='ident'>base64</span>::{<span class='ident'>STANDARD</span>, <span class='ident'>ToBase64</span>};
 <span class='kw'>use</span> <span class='ident'>rustc_serialize</span>::<span class='ident'>hex</span>::<span class='ident'>ToHex</span>;
 <span class='kw'>use</span> <span class='ident'>sodium_sys</span>::<span class='ident'>crypto</span>::<span class='ident'>utils</span>::<span class='ident'>init</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fmt</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::{<span class='ident'>ONCE_INIT</span>, <span class='ident'>Once</span>};
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>types</span>::{<span class='ident'>Mode</span>, <span class='ident'>Region</span>, <span class='ident'>Service</span>, <span class='ident'>SigningVersion</span>};
 <span class='kw'>use</span> <span class='ident'>urlparse</span>::{<span class='ident'>quote</span>, <span class='ident'>urlparse</span>};
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>utils</span>::<span class='ident'>hashed_data</span>;
 
 <span class='kw'>const</span> <span class='ident'>AWS4_REQUEST</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;aws4_request&quot;</span>;
 <span class='kw'>const</span> <span class='ident'>DATE_FMT</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;%Y%m%d&quot;</span>;

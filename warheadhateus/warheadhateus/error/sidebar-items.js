@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["AWSAuthError","Authentication Error Types"]]});
+initSidebarItems({"enum":[["AWSAuthError","Authentication Error Types"]],"struct":[["ParseRegionError","Thrown when a given region cannot be parsed."],["ParseServiceError","Thrown when a given service cannot be parsed."]]});
