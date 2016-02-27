@@ -46,15 +46,21 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-166' class='srclink' href='../src/warheadhateus/service.rs.html#7-16' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-114' class='srclink' href='../src/warheadhateus/types.rs.html#15-26' title='goto source code'>[src]</a></span></h1>
 <pre class='rust enum'>pub enum Service {
-    EC2,
-    S3,
     DynamoDB,
-    APIGateway,
+    EC2,
+    IAM,
+    S3,
+    STS,
 }</pre><div class='docblock'><p>AWS Services</p>
 </div><h2 class='variants'>Variants</h2>
-<table><tr><td id='variant.EC2'><code>EC2</code></td><td><div class='docblock'></div></td></tr><tr><td id='variant.S3'><code>S3</code></td><td><div class='docblock'></div></td></tr><tr><td id='variant.DynamoDB'><code>DynamoDB</code></td><td><div class='docblock'></div></td></tr><tr><td id='variant.APIGateway'><code>APIGateway</code></td><td><div class='docblock'></div></td></tr></table><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html' title='core::fmt::Display'>Display</a> for <a class='enum' href='../warheadhateus/enum.Service.html' title='warheadhateus::Service'>Service</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html#method.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+<table><tr><td id='variant.DynamoDB'><code>DynamoDB</code></td><td><div class='docblock'><p>AWS DynamoDB (Managed NoSQL Database)</p>
+</div></td></tr><tr><td id='variant.EC2'><code>EC2</code></td><td><div class='docblock'><p>AWS EC2 (Virtual Servers in the Cloud)</p>
+</div></td></tr><tr><td id='variant.IAM'><code>IAM</code></td><td><div class='docblock'><p>AWS Identity and Account Management</p>
+</div></td></tr><tr><td id='variant.S3'><code>S3</code></td><td><div class='docblock'><p>AWS S3 (Scalable Storage in the Cloud)</p>
+</div></td></tr><tr><td id='variant.STS'><code>STS</code></td><td><div class='docblock'><p>AWS STS (Security Token Service)</p>
+</div></td></tr></table><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html' title='core::fmt::Display'>Display</a> for <a class='enum' href='../warheadhateus/enum.Service.html' title='warheadhateus::Service'>Service</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html#method.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
 </div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/str/trait.FromStr.html' title='core::str::FromStr'>FromStr</a> for <a class='enum' href='../warheadhateus/enum.Service.html' title='warheadhateus::Service'>Service</a></code></h3><div class='impl-items'><h4 id='assoc_type.Err' class='type'><code>type Err = ParseServiceError</code></h4>
 <h4 id='method.from_str' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/str/trait.FromStr.html#method.from_str' class='fnname'>from_str</a>(s: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='enum' href='../warheadhateus/enum.Service.html' title='warheadhateus::Service'>Service</a>, ParseServiceError&gt;</code></h4>
 </div><h3 class='impl'><code>impl&lt;'a&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.Into.html' title='core::convert::Into'>Into</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt; for &amp;'a <a class='enum' href='../warheadhateus/enum.Service.html' title='warheadhateus::Service'>Service</a></code></h3><div class='docblock'><p>Translates region enum into AWS format.  EG: us-east-1</p>

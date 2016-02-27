@@ -4,13 +4,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `src/mode.rs`.">
-    <meta name="keywords" content="rust, rustlang, rust-lang">
+    <meta name="description" content="API documentation for the Rust `SigningVersion` enum in crate `warheadhateus`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, SigningVersion">
 
-    <title>mode.rs.html -- source</title>
+    <title>warheadhateus::SigningVersion - Rust</title>
 
-    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
-    <link rel="stylesheet" type="text/css" href="../../main.css">
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
 
     
     
@@ -27,7 +27,7 @@
 
     <nav class="sidebar">
         
-        
+        <p class='location'><a href='index.html'>warheadhateus</a></p><script>window.sidebarCurrent = {name: 'SigningVersion', ty: 'enum', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -41,23 +41,20 @@
         </form>
     </nav>
 
-    <section id='main' class="content source"><pre class="line-numbers"><span id="1">1</span>
-<span id="2">2</span>
-<span id="3">3</span>
-<span id="4">4</span>
-<span id="5">5</span>
-<span id="6">6</span>
-<span id="7">7</span>
-</pre><pre class='rust '>
-<span class='doccomment'>/// Amazon S3 Mode of Operation</span>
-<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>Mode</span> {
-    <span class='doccomment'>/// Use this mode when transferring a payload in one chunk.</span>
-    <span class='ident'>Normal</span>,
-    <span class='doccomment'>/// Use this mode when transferring a payload in multiple chunks.</span>
-    <span class='ident'>Chunked</span>,
-}
-</pre>
-</section>
+    <section id='main' class="content enum">
+<h1 class='fqn'><span class='in-band'>Enum <a href='index.html'>warheadhateus</a>::<wbr><a class='enum' href=''>SigningVersion</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-155' class='srclink' href='../src/warheadhateus/types.rs.html#64-69' title='goto source code'>[src]</a></span></h1>
+<pre class='rust enum'>pub enum SigningVersion {
+    Two,
+    Four,
+}</pre><div class='docblock'><p>Amazon AWS Signing Version</p>
+</div><h2 class='variants'>Variants</h2>
+<table><tr><td id='variant.Two'><code>Two</code></td><td><div class='docblock'><p>Version 2 (Only use this is the API doesn&#39;t support 4 yet)</p>
+</div></td></tr><tr><td id='variant.Four'><code>Four</code></td><td><div class='docblock'><p>Version 4</p>
+</div></td></tr></table></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>
@@ -109,13 +106,13 @@
     
 
     <script>
-        window.rootPath = "../../";
+        window.rootPath = "../";
         window.currentCrate = "warheadhateus";
         window.playgroundUrl = "";
     </script>
-    <script src="../../jquery.js"></script>
-    <script src="../../main.js"></script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
     
-    <script defer src="../../search-index.js"></script>
+    <script defer src="../search-index.js"></script>
 </body>
 </html>
