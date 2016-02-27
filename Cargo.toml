@@ -22,6 +22,7 @@ optional = true
 version = "~0.0.43"
 
 [dev-dependencies]
+bitflags = "0.4.0"
 clap = "2.1.2"
 curl = "~0.2.16"
 env_logger = "~0.3.2"
