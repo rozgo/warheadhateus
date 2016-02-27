@@ -21,7 +21,8 @@ use xml::reader::{EventReader, XmlEvent};
 const EX_STDOUT: &'static str = "Unable to write to stdout!";
 const DATE_TIME_FMT: &'static str = "%Y%m%dT%H%M%SZ";
 const HOST: &'static str = "ec2.amazonaws.com";
-const URL_1: &'static str = "https://ec2.amazonaws.com/?Version=2015-10-01&Action=DescribeInstances&DryRun=true";
+const URL_1: &'static str = "https://ec2.amazonaws.com/?Version=2015-10-01\
+                            &Action=DescribeInstances&DryRun=true";
 
 bitflags! {
     flags EventFlags: u32 {
@@ -117,9 +118,7 @@ fn run() -> Result<(), AWSAuthError> {
                 .header("Authorization", &ah)
                 .header("X-Amz-Date", fmtdate)
                 .exec().expect("Failed to perform EC2 GET!");
-            let body = String::from_utf8_lossy(resp.get_body());
-
-            let parser = EventReader::new(body.as_bytes());
+            let parser = EventReader::new(resp.get_body());
             let mut response: Response = Default::default();
             let mut curr_err: XmlError = Default::default();
             let mut flags = W_NONE;
