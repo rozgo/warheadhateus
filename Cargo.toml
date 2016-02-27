@@ -8,7 +8,7 @@ license = "MIT/Apache-2.0"
 name = "warheadhateus"
 readme = "README.md"
 repository = "https://github.com/rustyhorde/warheadhateus"
-version = "0.2.1-pre"
+version = "0.2.1"
 
 [dependencies]
 chrono = "~0.2.19"
