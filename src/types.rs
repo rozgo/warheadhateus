@@ -23,6 +23,8 @@ pub enum Service {
     S3,
     /// AWS STS (Security Token Service)
     STS,
+    /// AWS Lex (Conversational Interfaces)
+    LEX,
 }
 
 impl fmt::Display for Service {
@@ -42,6 +44,7 @@ impl FromStr for Service {
             "iam" => Ok(Service::IAM),
             "s3" => Ok(Service::S3),
             "sts" => Ok(Service::STS),
+            "lex" => Ok(Service::LEX),
             _ => Err(ParseServiceError),
         }
     }
@@ -56,6 +59,7 @@ impl<'a> Into<String> for &'a Service {
             Service::IAM => "iam".to_owned(),
             Service::S3 => "s3".to_owned(),
             Service::STS => "sts".to_owned(),
+            Service::LEX => "lex".to_owned(),
         }
     }
 }
